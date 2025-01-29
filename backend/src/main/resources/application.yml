@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: backend
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/translator
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: true
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  mvc:
+    hidden method:
+      filter:
+        enabled: true
+
+app:
+  upload:
+    directory: uploads/
+
+logging:
+  level:
+    root: INFO
+    git.klodhem.backend.controllers: DEBUG
+    git.klodhem.backend.services: DEBUG
+  file:
+    name: logs/translator_log.log
+    path: logs
+    pattern:
+      console: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
+      file: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
