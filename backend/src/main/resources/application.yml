@@ -36,3 +36,16 @@ logging:
     pattern:
       console: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
       file: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
+#  logback:
+#    rolling policy:
+#      file-name-pattern: logs/%d{yyyy-MM-dd}.log
+#      max-history: 30
+
+
+ffmpegPath: C:\FFmpeg\bin\ffmpeg.exe
+ffprobePath: C:\FFmpeg\bin\ffprobe.exe
+bucket: ${BUCKET_NAME}
+KEY_ID: ${YANDEX_SECRET_KEY_ID}
+SECRET_KEY: ${YANDEX_SECRET_KEY}
+REGION: "ru-central1"
+S3_ENDPOINT: "https://storage.yandexcloud.net"
