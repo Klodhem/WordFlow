@@ -32,10 +32,34 @@ public class AudioServiceImpl implements AudioService {
 
     private final AWSServiceImpl awsServiceImpl;
 
+
+    public void convertRawToWav(String inputFilePath, String outputFilePath){
+        try {
+            FFmpeg ffmpeg = new FFmpeg(ffmpegPath);
+            FFmpegExecutor executor = new FFmpegExecutor(ffmpeg);
+
+            FFmpegBuilder builder = new FFmpegBuilder()
+                    .setInput(inputFilePath)
+                    .setFormat("s16le")
+                    .addExtraArgs("-ar", "48000")
+                    .addExtraArgs("-ac", "1")
+                    .addOutput(outputFilePath)
+                    .setFormat("wav")
+                    .setAudioCodec("pcm_s16le")
+                    .done();
+            executor.createJob(builder).run();
+            log.debug("Файл успешно конвертирован из формата RAW в WAV.");
+        }
+        catch (IOException e){
+            log.error("Ошибка при конвертации файла из формата RAW в WAV: {}", e.getMessage());
+        }
+    }
+
+
     @Override
-    public void extractAudioFromVideo(String videoName) {
+    public String extractAudioFromVideo(String videoName) {
         String baseName = videoName.replaceFirst("[.][^.]+$", "");
-        String audioPath = baseName+"_audio.mp3";
+        String audioPath = baseName+"_audio.wav";
         String videoPath = DIRECTORY+videoName;
         try {
             FFmpeg ffmpeg = new FFmpeg(ffmpegPath);
@@ -54,7 +78,8 @@ public class AudioServiceImpl implements AudioService {
             FFmpegBuilder builder = new FFmpegBuilder()
                     .setInput(videoPath)
                     .addOutput(DIRECTORY+audioPath)
-                    .setFormat("mp3")
+                    .setFormat("wav")
+                    .setAudioCodec("pcm_s16le")
                     .disableVideo()
                     .done();
 
@@ -74,6 +99,6 @@ public class AudioServiceImpl implements AudioService {
             log.error("Ошибка при извлечении аудио: {}", e.getMessage());
         }
         log.debug("Аудио успешно извлечено и сохранено в: {}", audioPath);
-        awsServiceImpl.uploadToStorage(audioPath);
+        return audioPath;
     }
 }

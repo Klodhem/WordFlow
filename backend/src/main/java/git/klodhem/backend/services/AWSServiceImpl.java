@@ -1,6 +1,7 @@
 package git.klodhem.backend.services;
 
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -8,9 +9,9 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
@@ -21,6 +22,7 @@ import java.nio.file.Paths;
 
 @Service
 @Log4j2
+@RequiredArgsConstructor
 public class AWSServiceImpl implements AWSService {
     @Value("${bucket}")
     private String bucketName;
@@ -40,10 +42,8 @@ public class AWSServiceImpl implements AWSService {
     @Value("${app.upload.directory}")
     private String DIRECTORY_PATH;
 
-    @Value("${spring.datasource.username}")
-    private String databaseUsername;
-
     private S3Client s3Client;
+
 
     @PostConstruct
     public void init() {

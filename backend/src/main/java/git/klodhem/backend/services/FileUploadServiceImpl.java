@@ -20,7 +20,6 @@ import java.util.Objects;
 public class FileUploadServiceImpl implements FileUploadService {
     @Value("${app.upload.directory}")
     private String DIRECTORY_PATH;
-    private final AudioServiceImpl audioService;
 
     @Override
     public String uploadFile(MultipartFile file) {
@@ -37,9 +36,8 @@ public class FileUploadServiceImpl implements FileUploadService {
             }
             Path filePath = path.resolve(Objects.requireNonNull(file.getOriginalFilename()));
             Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-            audioService.extractAudioFromVideo(file.getOriginalFilename());
             log.debug("Файл сохранён");
-            return "Файл сохранён";
+            return file.getOriginalFilename();
         }
         catch (Exception e) {
             log.error("Ошибка при загрузке файла: {}", e.getMessage(), e);
