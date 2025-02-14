@@ -1,6 +1,8 @@
 package git.klodhem.backend.controllers;
 
-import git.klodhem.backend.services.FileUploadServiceImpl;
+import git.klodhem.backend.services.VideoProcessingService;
+import git.klodhem.backend.util.Language;
+import git.klodhem.backend.util.LanguageTranslate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,12 +16,11 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @Log4j2
 public class FileUploadController {
-    private final FileUploadServiceImpl fileUploadServiceImpl;
+    private final VideoProcessingService videoProcessingService;
 
     @PostMapping("/upload")
-    public String upload(@RequestParam("file") MultipartFile file) {
-        log.debug("Началась загрузка файла");
-        String res = fileUploadServiceImpl.uploadFile(file);
-        return "success";
+    public boolean recognizeVideo(@RequestParam("file") MultipartFile file, @RequestParam Language language,
+                                  @RequestParam(required = false) LanguageTranslate languageTranslate) {
+        return videoProcessingService.videoProcessing(file, language, languageTranslate);
     }
 }
