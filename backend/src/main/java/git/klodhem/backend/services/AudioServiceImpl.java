@@ -30,6 +30,9 @@ public class AudioServiceImpl implements AudioService {
     @Value("${app.upload.directory}")
     private String DIRECTORY;
 
+    @Value("${app.upload.directory}")
+    private String DIRECTORY_UPLOAD;
+
     private final AWSServiceImpl awsServiceImpl;
 
 
@@ -57,18 +60,18 @@ public class AudioServiceImpl implements AudioService {
 
 
     @Override
-    public String extractAudioFromVideo(String videoName) {
-        String baseName = videoName.replaceFirst("[.][^.]+$", "");
-        String audioPath = baseName+"_audio.wav";
-        String videoPath = DIRECTORY+videoName;
+    public String extractAudioFromVideo(String fileName, String type) {
+//        String baseName = videoPath.replaceFirst("[.][^.]+$", "")
+//                .substring(videoPath.lastIndexOf("/") + 1);
+        String audioPath = fileName+"_audio.wav";
         try {
             FFmpeg ffmpeg = new FFmpeg(ffmpegPath);
             FFprobe ffprobe = new FFprobe(ffprobePath);
             FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
-            Path inputPath = Paths.get(videoPath);
+            Path inputPath = Paths.get(DIRECTORY_UPLOAD+fileName+type);
 
             if (!Files.exists(inputPath)) {
-                throw new IOException("Входной файл не найден: " + videoPath);
+                throw new IOException("Входной файл не найден: " + DIRECTORY_UPLOAD+fileName+type);
             }
             Path outputPath = Paths.get(DIRECTORY+audioPath).getParent();
             if (outputPath != null && !Files.exists(outputPath)) {
@@ -76,7 +79,7 @@ public class AudioServiceImpl implements AudioService {
             }
 
             FFmpegBuilder builder = new FFmpegBuilder()
-                    .setInput(videoPath)
+                    .setInput(DIRECTORY_UPLOAD+fileName+type)
                     .addOutput(DIRECTORY+audioPath)
                     .setFormat("wav")
                     .setAudioCodec("pcm_s16le")
@@ -97,6 +100,7 @@ public class AudioServiceImpl implements AudioService {
         }
         catch (Exception e) {
             log.error("Ошибка при извлечении аудио: {}", e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
         log.debug("Аудио успешно извлечено и сохранено в: {}", audioPath);
         return audioPath;

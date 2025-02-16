@@ -21,6 +21,7 @@ public class FileUploadController {
     @PostMapping("/upload")
     public boolean recognizeVideo(@RequestParam("file") MultipartFile file, @RequestParam Language language,
                                   @RequestParam(required = false) LanguageTranslate languageTranslate) {
-        return videoProcessingService.videoProcessing(file, language, languageTranslate);
+        String fileName = file.getOriginalFilename();
+        return videoProcessingService.videoProcessing(file, fileName, language, languageTranslate);
     }
 }

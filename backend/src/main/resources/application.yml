@@ -65,3 +65,7 @@ folderId: ${FOLDER_ID}
 urlTranslateText: "https://translate.api.cloud.yandex.net/translate/v2/translate"
 urlSynthesisSpeech: "https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize"
 urlRecognitionSpeech: "https://storage.yandexcloud.net/video.translate/"
+
+bucketMinio: ${BUCKET_MINIO}
+minioUser: ${MINIO_USER}
+minioPassword: ${MINIO_PASSWORD}

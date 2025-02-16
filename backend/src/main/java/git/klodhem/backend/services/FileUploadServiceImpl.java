@@ -21,8 +21,10 @@ public class FileUploadServiceImpl implements FileUploadService {
     @Value("${app.upload.directory}")
     private String DIRECTORY_PATH;
 
+    private final VideoService videoService;
+
     @Override
-    public String uploadFile(MultipartFile file) {
+    public long uploadFile(MultipartFile file, String title, String fileName) {
         try(InputStream inputStream = file.getInputStream()) {
             if (file.isEmpty()) {
                 log.warn("Файл пустой");
@@ -34,10 +36,12 @@ public class FileUploadServiceImpl implements FileUploadService {
                 Files.createDirectories(path);
                 log.info("Создана директория: {}", DIRECTORY_PATH);
             }
-            Path filePath = path.resolve(Objects.requireNonNull(file.getOriginalFilename()));
+            String formatFile = Objects.requireNonNull(file.getOriginalFilename())
+                    .substring(file.getOriginalFilename().lastIndexOf("."));
+            Path filePath = path.resolve(fileName+formatFile);
             Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
             log.debug("Файл сохранён");
-            return file.getOriginalFilename();
+            return videoService.saveVideo(title, filePath.toString());
         }
         catch (Exception e) {
             log.error("Ошибка при загрузке файла: {}", e.getMessage(), e);

@@ -1,7 +1,9 @@
 package git.klodhem.backend.services;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import git.klodhem.backend.dto.ResponseTranslateDTO;
 import git.klodhem.backend.dto.ResultSpeechRecognitionDTO;
+import git.klodhem.backend.util.JsonUtil;
 import git.klodhem.backend.util.Language;
 import git.klodhem.backend.util.LanguageTranslate;
 import git.klodhem.backend.util.Subtitle;
@@ -14,6 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,28 +35,47 @@ public class VideoProcessingServiceImpl implements VideoProcessingService {
 
     private final TranslateService translateService;
 
-    @Override
-    public boolean videoProcessing(MultipartFile file, Language language, LanguageTranslate languageTranslate) {
-        String fileName = fileUploadServiceImpl.uploadFile(file);
+    private final LocalStorageService localStorageService;
 
-        String audioPath = audioService.extractAudioFromVideo(fileName);
+    private final VideoService videoService;
+
+    private final JsonUtil jsonUtil;
+
+    @Override
+    public boolean videoProcessing(MultipartFile file, String title, Language language, LanguageTranslate languageTranslate) {
+        String fileName = String.valueOf(file.hashCode()+file.getSize());
+//        localStorageService.uploadToStorage(file, uuidName);
+
+        long videoId = fileUploadServiceImpl.uploadFile(file, title, fileName);
+        String originalType = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+        String audioPath = audioService.extractAudioFromVideo(fileName, originalType);
 
         awsServiceImpl.uploadToStorage(audioPath);
 
         ArrayList<ResultSpeechRecognitionDTO> dtoList = recognitionService.asyncSpeechRecognition(audioPath, language);
 
-        ArrayList<Subtitle> subtitlesOriginals = subtitlesUtil.convertToSubtitles(dtoList);
-        subtitlesUtil.createSrtSubtitles(subtitlesOriginals, fileName, language.getCode());
+        ArrayList<Subtitle> subtitles = subtitlesUtil.convertToSubtitles(dtoList);
+        String originalText = subtitles.stream()
+                .map(Subtitle::getText)
+                .collect(Collectors.joining(" "));
+
+        JsonNode jsonNode = jsonUtil.createJson(language, subtitles);
+        subtitlesUtil.createSrtSubtitles(subtitles, fileName, language.getCode());
         List<String> originals = new LinkedList<>();
-        subtitlesOriginals.forEach(subtitle -> {
+        subtitles.forEach(subtitle -> {
             originals.add(subtitle.getText());
         });
         List<ResponseTranslateDTO.TranslateDTO> translatePhrase = translateService.translateList(originals, languageTranslate);
-        for (int i = 0; i < subtitlesOriginals.size(); i++) {
-            subtitlesOriginals.get(i).setText(translatePhrase.get(i).getText());
+        for (int i = 0; i < subtitles.size(); i++) {
+            subtitles.get(i).setText(translatePhrase.get(i).getText());
         }
-        subtitlesUtil.createSrtSubtitles(subtitlesOriginals, fileName, languageTranslate.getCode());
-
+        String translateText = subtitles.stream()
+                .map(Subtitle::getText)
+                .collect(Collectors.joining(" "));
+        jsonNode = jsonUtil.addTranslate(jsonNode, languageTranslate, subtitles);
+        subtitlesUtil.createSrtSubtitles(subtitles, fileName, languageTranslate.getCode());
+        videoService.saveProposalsAndTexts(videoId, jsonNode, originalText, translateText);
         return true;
     }
+
 }
