@@ -45,10 +45,6 @@ logging:
     pattern:
       console: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
       file: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
-#  logback:
-#    rolling policy:
-#      file-name-pattern: logs/%d{yyyy-MM-dd}.log
-#      max-history: 30
 
 
 jwt_secret: ${JWT_SECRET}

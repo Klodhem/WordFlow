@@ -1,6 +1,7 @@
 package git.klodhem.backend.controllers;
 
 import git.klodhem.backend.services.SpeechSynthesisService;
+import git.klodhem.backend.util.Language;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpHeaders;
@@ -25,8 +26,10 @@ public class SpeechSynthesisController {
     private final SpeechSynthesisService speechSynthesisService;
 
     @GetMapping("/synthesize")
-    public ResponseEntity<StreamingResponseBody> speechSynthesis(@RequestParam String text) {
-        File audioFile  = new File(speechSynthesisService.synthesizeSpeech(text));
+    public ResponseEntity<StreamingResponseBody> speechSynthesis(@RequestParam String text,
+                                                                 @RequestParam Language language,
+                                                                 @RequestParam Double speechRate) {
+        File audioFile  = new File(speechSynthesisService.synthesizeSpeech(text, language, speechRate));
 
         StreamingResponseBody responseBody = out -> {
             try(InputStream in = new FileInputStream(audioFile)) {

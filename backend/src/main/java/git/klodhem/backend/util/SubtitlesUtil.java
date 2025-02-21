@@ -60,40 +60,76 @@ public class SubtitlesUtil {
     }
 
 
-    public void createSrtSubtitles(List<Subtitle> subtitles, String file, String language){
-        StringBuilder srtBuilder = new StringBuilder();
-        for (int i = 0; i < subtitles.size(); i++) {
-            Subtitle sub = subtitles.get(i);
-            String startSrtTime = convertToSrtTime(sub.getStartTime());
-            String endSrtTime = convertToSrtTime(sub.getEndTime());
+//    public void createSrtSubtitles(List<Subtitle> subtitles, String file, String language){
+//        StringBuilder srtBuilder = new StringBuilder();
+//        for (int i = 0; i < subtitles.size(); i++) {
+//            Subtitle sub = subtitles.get(i);
+//            String startSrtTime = convertToSrtTime(sub.getStartTime());
+//            String endSrtTime = convertToSrtTime(sub.getEndTime());
+//
+//            srtBuilder.append(i + 1).append("\n")
+//                    .append(startSrtTime).append(" --> ").append(endSrtTime).append("\n")
+//                    .append(sub.getText()).append("\n\n");
+//        }
+//
+//        try (FileWriter writer = new FileWriter(directorySubPath+file+"_"+language+".srt")) {
+//            Path path = Paths.get(directorySubPath);
+//            if (!Files.exists(path)) {
+//                Files.createDirectories(path);
+//                log.info("Создана директория: {}", directorySubPath);
+//            }
+//            Path filePath = path.resolve(file+"_"+language);
+//            writer.write(srtBuilder.toString());
+//            log.debug("Субтитры созданы: {}", filePath);
+//        } catch (IOException e) {
+//            log.error("Ошибка при создании субтитров: {}", e.getMessage());
+//            throw new SubtitleCreateException("Ошибка при создании субтитров");
+//        }
+//    }
 
-            srtBuilder.append(i + 1).append("\n")
-                    .append(startSrtTime).append(" --> ").append(endSrtTime).append("\n")
-                    .append(sub.getText()).append("\n\n");
+    public String createVttSubtitles(List<Subtitle> subtitles, String file, String language) {
+        StringBuilder vttBuilder = new StringBuilder();
+        vttBuilder.append("WEBVTT").append("\n\n");
+
+        for (Subtitle sub : subtitles) {
+            String startVttTime = convertToVttTime(sub.getStartTime());
+            String endVttTime = convertToVttTime(sub.getEndTime());
+
+            vttBuilder.append(startVttTime)
+                    .append(" --> ")
+                    .append(endVttTime)
+                    .append("\n")
+                    .append(sub.getText())
+                    .append("\n\n");
         }
 
-        try (FileWriter writer = new FileWriter(directorySubPath+file+"_"+language+".srt")) {
+        try {
             Path path = Paths.get(directorySubPath);
             if (!Files.exists(path)) {
                 Files.createDirectories(path);
                 log.info("Создана директория: {}", directorySubPath);
             }
-            Path filePath = path.resolve(file+"_"+language);
-            writer.write(srtBuilder.toString());
+
+            Path filePath = path.resolve(file + "_" + language + ".vtt");
+            try (FileWriter writer = new FileWriter(filePath.toFile())) {
+                writer.write(vttBuilder.toString());
+            }
             log.debug("Субтитры созданы: {}", filePath);
+            return filePath.toString();
         } catch (IOException e) {
             log.error("Ошибка при создании субтитров: {}", e.getMessage());
             throw new SubtitleCreateException("Ошибка при создании субтитров");
         }
     }
 
-    private static String convertToSrtTime(String timeStr) {
+    private static String convertToVttTime(String timeStr) {
         timeStr = timeStr.replace("s", "");
-        double seconds = Double.parseDouble(timeStr);
-        int hour = (int) (seconds / 3600);
-        int minute = (int) ((seconds % 3600) / 60);
-        int sec = (int) (seconds % 60);
-        int millis = (int) ((seconds - Math.floor(seconds)) * 1000);
-        return String.format("%02d:%02d:%02d,%03d", hour, minute, sec, millis);
+        long millis = Long.parseLong(timeStr);
+        int hour = (int) ((millis/1000) / 3600);
+        int minute = (int) (((millis/1000) % 3600) / 60);
+        int seconds = (int) (millis / 1000) % 60;
+        int ms = (int) millis % 1000;
+
+        return String.format("%02d:%02d:%02d.%03d", hour, minute, seconds, ms);
     }
 }

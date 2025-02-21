@@ -1,5 +1,6 @@
 package git.klodhem.backend.services;
 
+import git.klodhem.backend.util.Language;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,9 +38,9 @@ public class SpeechSynthesisServiceImpl implements SpeechSynthesisService {
 
 
     @Override
-    public String synthesizeSpeech(String text) {
+    public String synthesizeSpeech(String text, Language language, double speechRate) {
         String hashText = String.valueOf(text.hashCode());
-        String wavPath = "synthesizeSpeech/"+hashText+".wav";
+        String wavPath = "synthesizeSpeech/"+hashText+"_"+speechRate+".wav";
         File file = new File(wavPath);
         if (file.exists()) {
             log.debug("Файл уже существует");
@@ -48,9 +49,9 @@ public class SpeechSynthesisServiceImpl implements SpeechSynthesisService {
         Path rawPath = Paths.get("synthesizeSpeech/"+hashText+".raw");
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("text", text);
-        params.add("lang", "ru-RU");
-        params.add("voice", "filipp");
+        params.add("lang", language.getCode());
         params.add("folderId", folderId);
+        params.add("speed", String.valueOf(speechRate));
         params.add("format", "lpcm");
         params.add("sampleRateHertz", "48000");
 
@@ -69,7 +70,7 @@ public class SpeechSynthesisServiceImpl implements SpeechSynthesisService {
                 Files.write(rawPath, response.getBody());
                 audioService.convertRawToWav(rawPath.toString(), wavPath);
                 Files.deleteIfExists(rawPath);
-                return "synthesizeSpeech/"+hashText+".wav";
+                return wavPath;
             } catch (IOException e) {
                 throw new RuntimeException("Не удалось сохранить файл", e);
             }

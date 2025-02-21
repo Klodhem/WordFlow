@@ -43,7 +43,7 @@ public class VideoProcessingServiceImpl implements VideoProcessingService {
 
     @Override
     public boolean videoProcessing(MultipartFile file, String title, Language language, LanguageTranslate languageTranslate) {
-        String fileName = String.valueOf(file.hashCode()+file.getSize());
+        String fileName = UUID.randomUUID().toString();
 //        localStorageService.uploadToStorage(file, uuidName);
 
         long videoId = fileUploadServiceImpl.uploadFile(file, title, fileName);
@@ -60,7 +60,7 @@ public class VideoProcessingServiceImpl implements VideoProcessingService {
                 .collect(Collectors.joining(" "));
 
         JsonNode jsonNode = jsonUtil.createJson(language, subtitles);
-        subtitlesUtil.createSrtSubtitles(subtitles, fileName, language.getCode());
+        String originalVtt = subtitlesUtil.createVttSubtitles(subtitles, fileName, language.getCode());
         List<String> originals = new LinkedList<>();
         subtitles.forEach(subtitle -> {
             originals.add(subtitle.getText());
@@ -73,8 +73,8 @@ public class VideoProcessingServiceImpl implements VideoProcessingService {
                 .map(Subtitle::getText)
                 .collect(Collectors.joining(" "));
         jsonNode = jsonUtil.addTranslate(jsonNode, languageTranslate, subtitles);
-        subtitlesUtil.createSrtSubtitles(subtitles, fileName, languageTranslate.getCode());
-        videoService.saveProposalsAndTexts(videoId, jsonNode, originalText, translateText);
+        String translateVtt =subtitlesUtil.createVttSubtitles(subtitles, fileName, languageTranslate.getCode());
+        videoService.saveProposalsAndTexts(videoId, jsonNode, originalText, translateText, originalVtt, translateVtt);
         return true;
     }
 
