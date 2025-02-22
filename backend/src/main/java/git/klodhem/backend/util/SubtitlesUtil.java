@@ -1,6 +1,7 @@
 package git.klodhem.backend.util;
 
 import git.klodhem.backend.dto.ResultSpeechRecognitionDTO;
+import git.klodhem.backend.dto.SubtitleDTO;
 import git.klodhem.backend.exception.SubtitleCreateException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,8 +22,8 @@ public class SubtitlesUtil {
     private String directorySubPath;
 
 
-    public ArrayList<Subtitle> convertToSubtitles(ArrayList<ResultSpeechRecognitionDTO> dtos) {
-        ArrayList<Subtitle> subtitles = new ArrayList<>();
+    public ArrayList<SubtitleDTO> convertToSubtitles(ArrayList<ResultSpeechRecognitionDTO> dtos) {
+        ArrayList<SubtitleDTO> subtitleDTOS = new ArrayList<>();
         //todo
 //        if (dto == null
 //                || dto.getFinalRefinement() == null
@@ -52,11 +53,11 @@ public class SubtitlesUtil {
 
                 String startTime = words.get(wordIndex).getStartTimeMs();
                 String endTime = words.get(wordIndex + sentenceWordCount - 1).getEndTimeMs();
-                subtitles.add(new Subtitle(sentence, startTime, endTime));
+                subtitleDTOS.add(new SubtitleDTO(sentence, startTime, endTime));
                 wordIndex += sentenceWordCount;
             }
         });
-        return subtitles;
+        return subtitleDTOS;
     }
 
 
@@ -87,11 +88,11 @@ public class SubtitlesUtil {
 //        }
 //    }
 
-    public String createVttSubtitles(List<Subtitle> subtitles, String file, String language) {
+    public String createVttSubtitles(List<SubtitleDTO> subtitleDTOS, String file, String language) {
         StringBuilder vttBuilder = new StringBuilder();
         vttBuilder.append("WEBVTT").append("\n\n");
 
-        for (Subtitle sub : subtitles) {
+        for (SubtitleDTO sub : subtitleDTOS) {
             String startVttTime = convertToVttTime(sub.getStartTime());
             String endVttTime = convertToVttTime(sub.getEndTime());
 

@@ -3,6 +3,7 @@ package git.klodhem.backend.security;
 import git.klodhem.backend.model.User;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +13,7 @@ import java.util.Collections;
 
 @RequiredArgsConstructor
 @Getter
+@Setter
 public class UserDetailsImpl implements UserDetails {
     private final User user;
 

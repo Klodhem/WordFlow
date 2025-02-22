@@ -1,5 +1,6 @@
-package git.klodhem.backend.services;
+package git.klodhem.backend.services.impl;
 
+import git.klodhem.backend.services.AudioService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import net.bramp.ffmpeg.FFmpeg;

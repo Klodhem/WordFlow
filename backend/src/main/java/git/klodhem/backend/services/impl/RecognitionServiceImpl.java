@@ -1,9 +1,10 @@
-package git.klodhem.backend.services;
+package git.klodhem.backend.services.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import git.klodhem.backend.dto.ResponseRecognitionDTO;
 import git.klodhem.backend.dto.ResultSpeechRecognitionDTO;
 import git.klodhem.backend.dto.SpeechRecognitionDTO;
+import git.klodhem.backend.services.RecognitionService;
 import git.klodhem.backend.util.Language;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;

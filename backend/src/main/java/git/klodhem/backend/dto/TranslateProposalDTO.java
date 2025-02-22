@@ -1,4 +1,4 @@
-package git.klodhem.backend.util;
+package git.klodhem.backend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TranslateProposal {
+public class TranslateProposalDTO {
     private String original;
     private String translated;
 }

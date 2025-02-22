@@ -1,9 +1,10 @@
-package git.klodhem.backend.services;
+package git.klodhem.backend.services.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import git.klodhem.backend.dto.RequestTranslateDTO;
 import git.klodhem.backend.dto.ResponseTranslateDTO;
+import git.klodhem.backend.services.TranslateService;
 import git.klodhem.backend.util.LanguageTranslate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;

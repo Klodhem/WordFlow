@@ -5,7 +5,7 @@ import git.klodhem.backend.services.VideoProcessingService;
 import git.klodhem.backend.services.VideoService;
 import git.klodhem.backend.util.Language;
 import git.klodhem.backend.util.LanguageTranslate;
-import git.klodhem.backend.util.TranslateProposal;
+import git.klodhem.backend.dto.TranslateProposalDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.FileSystemResource;
@@ -96,7 +96,7 @@ public class VideoController {
     }
 
     @GetMapping("/dictionary/{name}")
-    public List<TranslateProposal> dictionary(@PathVariable String name){
+    public List<TranslateProposalDTO> dictionary(@PathVariable String name){
         return videoService.getDictionary(name);
     }
 

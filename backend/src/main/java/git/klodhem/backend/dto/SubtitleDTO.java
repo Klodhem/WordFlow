@@ -1,4 +1,4 @@
-package git.klodhem.backend.util;
+package git.klodhem.backend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class Subtitle {
+public class SubtitleDTO {
     private String text;
     private String startTime;
     private String endTime;

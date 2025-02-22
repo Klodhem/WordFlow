@@ -2,7 +2,7 @@ package git.klodhem.backend.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import git.klodhem.backend.dto.VideoDTO;
-import git.klodhem.backend.util.TranslateProposal;
+import git.klodhem.backend.dto.TranslateProposalDTO;
 
 import java.io.File;
 import java.util.List;
@@ -23,5 +23,5 @@ public interface VideoService {
 
     File getVttFile(String name, String type);
 
-    List<TranslateProposal> getDictionary(String name);
+    List<TranslateProposalDTO> getDictionary(String name);
 }

@@ -7,6 +7,7 @@ import git.klodhem.backend.exception.UserRegistrationException;
 import git.klodhem.backend.model.User;
 import git.klodhem.backend.security.JWTUtil;
 import git.klodhem.backend.services.UserService;
+import git.klodhem.backend.util.UserValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -29,6 +30,7 @@ public class AuthController {
     private final JWTUtil jwtUtil;
     private final ModelMapper modelMapper;
     private final UserService userService;
+    private final UserValidator userValidator;
 
 
 
@@ -37,9 +39,9 @@ public class AuthController {
                                                   BindingResult bindingResult){
         System.out.println(userDTO.getUsername());
         User user = convertToUser(userDTO);
-        //TODO
-//        userValidator.validate(user, bindingResult);
 
+        userValidator.validate(user, bindingResult);
+//        String field = bindingResult.getFieldError().getField();
         if (bindingResult.hasErrors()) {
             throw new UserRegistrationException("Ошибка при регистрации пользователя");
         }
@@ -65,6 +67,7 @@ public class AuthController {
         String token = jwtUtil.generateToken(authenticationDTO.getUsername());
         return Map.of("jwt-token", token);
     }
+
 
     private User convertToUser(UserDTO userDTO){
         return modelMapper.map(userDTO, User.class);

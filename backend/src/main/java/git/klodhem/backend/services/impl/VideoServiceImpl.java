@@ -1,17 +1,18 @@
-package git.klodhem.backend.services;
+package git.klodhem.backend.services.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import git.klodhem.backend.dto.SubtitleDTO;
 import git.klodhem.backend.dto.VideoDTO;
 import git.klodhem.backend.exception.VideoFileException;
 import git.klodhem.backend.model.User;
 import git.klodhem.backend.model.Video;
 import git.klodhem.backend.repositories.VideosRepository;
-import git.klodhem.backend.util.StatusVideo;
-import git.klodhem.backend.util.Subtitle;
+import git.klodhem.backend.services.VideoService;
 import git.klodhem.backend.util.ProposalMapper;
-import git.klodhem.backend.util.TranslateProposal;
+import git.klodhem.backend.util.StatusVideo;
+import git.klodhem.backend.dto.TranslateProposalDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -22,6 +23,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static git.klodhem.backend.util.SecurityUtil.getCurrentUser;
 
 @Service
 @RequiredArgsConstructor
@@ -43,11 +46,8 @@ public class VideoServiceImpl implements VideoService {
         video.setVideoPath(path);
         video.setStatus(StatusVideo.PROCESSING);
         User user = new User();
-        user.setUserId(getUserId());
+        user.setUserId(getCurrentUser().getUserId());
         video.setOwner(user);
-//        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//        UserDetails userDetails = (UserDetails) principal;
-//        video.setOwner(userDetails.getUser());
         return videosRepository.save(video).getVideoId();
     }
 
@@ -71,8 +71,8 @@ public class VideoServiceImpl implements VideoService {
         return videosRepository.findById(videoId).map(Video::getVideoPath).orElse(null);
     }
 
-    public List<VideoDTO> getVideosDTO(){
-        List<Video> allByOwnerUserId = videosRepository.findAllByOwnerUserId(getUserId());
+    public List<VideoDTO> getVideosDTO() {
+        List<Video> allByOwnerUserId = videosRepository.findAllByOwnerUserId(getCurrentUser().getUserId());
         return allByOwnerUserId.stream()
                 .map(this::convertToVideoDTO)
                 .toList();
@@ -80,7 +80,7 @@ public class VideoServiceImpl implements VideoService {
 
 
     public File getVideoFile(String name) {
-        Optional<Video> optionalVideo = videosRepository.findByOwnerUserIdAndTitle(getUserId(), name);
+        Optional<Video> optionalVideo = videosRepository.findByOwnerUserIdAndTitle(getCurrentUser().getUserId(), name);
         if (optionalVideo.isEmpty()) {
             log.warn("Запись о видео не найдена в БД");
             throw new VideoFileException("Запись о видео не найдена в БД");
@@ -101,8 +101,7 @@ public class VideoServiceImpl implements VideoService {
         Optional<Video> optionalVideo = videosRepository.findById(videoId);
         if (optionalVideo.isEmpty()) {
             return null;
-        }
-        else {
+        } else {
             video = optionalVideo.get();
             if (video.getOriginalText().replaceAll("[^\\p{L}0-9]", "").toUpperCase()
                     .contains(phrase.replaceAll("[^\\p{L}0-9]", "").toUpperCase()))
@@ -114,18 +113,19 @@ public class VideoServiceImpl implements VideoService {
         return null;
     }
 
-    private Long getPhraseTime(Video video, String typeLanguage,String phrase) {
+    private Long getPhraseTime(Video video, String typeLanguage, String phrase) {
         JsonNode proposals = video.getProposals().get(typeLanguage).get("subtitles");
-        ArrayList<Subtitle> subtitlesList = objectMapper.convertValue(proposals, new TypeReference<ArrayList<Subtitle>>() {});
+        ArrayList<SubtitleDTO> subtitlesList = objectMapper.convertValue(proposals, new TypeReference<>() {
+        });
 
-        for (Subtitle subtitle : subtitlesList) {
-            if (subtitle.getText().replaceAll("[^\\p{L}0-9]", "").toUpperCase()
+        for (SubtitleDTO subtitleDTO : subtitlesList) {
+            if (subtitleDTO.getText().replaceAll("[^\\p{L}0-9]", "").toUpperCase()
                     .contains(phrase.replaceAll("[^\\p{L}0-9]", "").toUpperCase()))
-                return Long.parseLong(subtitle.getStartTime());
+                return Long.parseLong(subtitleDTO.getStartTime());
         }
 
         for (int i = 1; i < subtitlesList.size(); i++) {
-            String concatenatedStrings = subtitlesList.get(i - 1).getText()+subtitlesList.get(i).getText();
+            String concatenatedStrings = subtitlesList.get(i - 1).getText() + subtitlesList.get(i).getText();
             if (concatenatedStrings.replaceAll("[^\\p{L}0-9]", "")
                     .equalsIgnoreCase(phrase.replaceAll("[^\\p{L}0-9]", "")))
                 return Long.parseLong(subtitlesList.get(i - 1).getStartTime());
@@ -136,12 +136,12 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     public File getVttFile(String name, String type) {
-        Optional<Video> optionalVideo = videosRepository.findByOwnerUserIdAndTitle(getUserId(), name);
+        Optional<Video> optionalVideo = videosRepository.findByOwnerUserIdAndTitle(getCurrentUser().getUserId(), name);
         if (optionalVideo.isEmpty()) {
             log.warn("Запись о видео не найдена в БД");
             throw new VideoFileException("Запись о видео не найдена в БД");
         }
-        if (optionalVideo.get().getSubtitlesOriginalPath()==null || optionalVideo.get().getSubtitlesTranslatePath()==null) {
+        if (optionalVideo.get().getSubtitlesOriginalPath() == null || optionalVideo.get().getSubtitlesTranslatePath() == null) {
             log.warn("Субтитры к видео не найдены");
             throw new VideoFileException("Субтитры к видео не найдены");
         }
@@ -161,8 +161,8 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public List<TranslateProposal> getDictionary(String name) {
-        Optional<Video> optionalVideo = videosRepository.findByOwnerUserIdAndTitle(getUserId(), name);
+    public List<TranslateProposalDTO> getDictionary(String name) {
+        Optional<Video> optionalVideo = videosRepository.findByOwnerUserIdAndTitle(getCurrentUser().getUserId(), name);
         if (optionalVideo.isEmpty()) {
             log.warn("Запись о видео не найдена в БД");
             throw new VideoFileException("Запись о видео не найдена в БД");
@@ -178,9 +178,4 @@ public class VideoServiceImpl implements VideoService {
     private Video convertToVideo(VideoDTO videoDTO) {
         return modelMapper.map(videoDTO, Video.class);
     }
-
-    private long getUserId(){
-        return 1;
-    }
-
 }
