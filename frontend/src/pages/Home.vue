@@ -32,12 +32,20 @@ const selectVideo = async video => {
     } catch (error) {
       console.log('Ошибка запроса словаря:', error.message)
     }
-    console.log(video)
     videoUrl.value = await fetchWithAuth(`http://localhost:8080/video/watch/${video.title}`)
     originalSubtitleUrl.value = await fetchWithAuth(`http://localhost:8080/video/originalSubtitle/${video.title}`)
     translatedSubtitleUrl.value = await fetchWithAuth(`http://localhost:8080/video/translateSubtitle/${video.title}`)
     selectedVideo.value = video
     if (videoPlayer.value) {
+      const videoElement = videoPlayer.value;
+      const originalTrack = videoElement.querySelector('track[srclang="or"]');
+      if (originalTrack) {
+        originalTrack.src = originalSubtitleUrl.value;
+      }
+      const translatedTrack = videoElement.querySelector('track[srclang="tr"]');
+      if (translatedTrack) {
+        translatedTrack.src = translatedSubtitleUrl.value;
+      }
       videoPlayer.value.load();
     }
   }
@@ -228,9 +236,12 @@ const fetchWithAuth = async (url) => {
       </div>
 
     </div>
+
     <div class="w-full">
+      <button @click="findPhrase"
+              class="px-3 py-1 w-full text-white disabled:bg-slate-600 bg-gray-700 hover:bg-gray-800 rounded-lg text-sm relative z-10">
+        Найти фрагмент</button>
             <textarea
-              @keydown.enter="findPhrase"
               v-model="userText"
               id="message"
               rows="4"

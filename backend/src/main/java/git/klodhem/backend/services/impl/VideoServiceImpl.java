@@ -67,9 +67,9 @@ public class VideoServiceImpl implements VideoService {
     }
 
 
-    public String getPath(long videoId) {
-        return videosRepository.findById(videoId).map(Video::getVideoPath).orElse(null);
-    }
+//    public String getPath(long videoId) {
+//        return videosRepository.findById(videoId).map(Video::getVideoPath).orElse(null);
+//    }
 
     public List<VideoDTO> getVideosDTO() {
         List<Video> allByOwnerUserId = videosRepository.findAllByOwnerUserId(getCurrentUser().getUserId());

@@ -52,11 +52,11 @@ public class VideoController {
         return videoService.getVideosDTO();
     }
 
-    @GetMapping("/select")
-    public ResponseEntity<String> select(@RequestParam(name = "videoId") Long videoId) {
-        String path = videoService.getPath(videoId);
-        return ResponseEntity.ok(path);
-    }
+//    @GetMapping("/select")
+//    public ResponseEntity<String> select(@RequestParam(name = "videoId") Long videoId) {
+//        String path = videoService.getPath(videoId);
+//        return ResponseEntity.ok(path);
+//    }
 
     @GetMapping("/searchPhrase")
     public ResponseEntity<Object> searchPhrase(@RequestParam(name = "videoId") Long videoId,

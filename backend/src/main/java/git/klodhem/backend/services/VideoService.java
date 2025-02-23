@@ -13,7 +13,7 @@ public interface VideoService {
     void saveProposalsAndTexts(long videoId, JsonNode jsonNode, String originalText,
                                String translateText, String originalVtt, String translateVtt);
 
-    String getPath(long videoId);
+//    String getPath(long videoId);
 
     List<VideoDTO> getVideosDTO();
 

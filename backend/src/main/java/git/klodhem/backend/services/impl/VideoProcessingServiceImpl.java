@@ -77,7 +77,7 @@ public class VideoProcessingServiceImpl implements VideoProcessingService {
                 .map(SubtitleDTO::getText)
                 .collect(Collectors.joining(" "));
         jsonNode = jsonUtil.addTranslate(jsonNode, languageTranslate, subtitleDTOS);
-        String translateVtt =subtitlesUtil.createVttSubtitles(subtitleDTOS, fileName, languageTranslate.getCode());
+        String translateVtt = subtitlesUtil.createVttSubtitles(subtitleDTOS, fileName, languageTranslate.getCode());
         videoService.saveProposalsAndTexts(videoId, jsonNode, originalText, translateText, originalVtt, translateVtt);
         return true;
     }

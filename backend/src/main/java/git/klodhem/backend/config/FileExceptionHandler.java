@@ -2,6 +2,7 @@ package git.klodhem.backend.config;
 
 import git.klodhem.backend.exception.ErrorResponse;
 import git.klodhem.backend.exception.FileUploadException;
+import git.klodhem.backend.exception.SubtitleCreateException;
 import git.klodhem.backend.exception.UserLoginException;
 import git.klodhem.backend.exception.UserRegistrationException;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ public class FileExceptionHandler {
     @ExceptionHandler({UserLoginException.class,
             UserRegistrationException.class,
             FileUploadException.class,
+            SubtitleCreateException.class,
             MaxUploadSizeExceededException.class})
     public ResponseEntity<ErrorResponse> handler(RuntimeException ex) {
         ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
