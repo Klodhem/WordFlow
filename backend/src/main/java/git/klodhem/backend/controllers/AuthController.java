@@ -27,19 +27,19 @@ import java.util.Map;
 @RequestMapping("/auth")
 public class AuthController {
     private final AuthenticationManager authenticationManager;
+
     private final JWTUtil jwtUtil;
+
     private final ModelMapper modelMapper;
+
     private final UserService userService;
+
     private final UserValidator userValidator;
-
-
 
     @PostMapping("/registration")
     public Map<String,String> performRegistration(@RequestBody @Valid UserDTO userDTO,
                                                   BindingResult bindingResult){
-        System.out.println(userDTO.getUsername());
         User user = convertToUser(userDTO);
-
         userValidator.validate(user, bindingResult);
 //        String field = bindingResult.getFieldError().getField();
         if (bindingResult.hasErrors()) {
@@ -67,7 +67,6 @@ public class AuthController {
         String token = jwtUtil.generateToken(authenticationDTO.getUsername());
         return Map.of("jwt-token", token);
     }
-
 
     private User convertToUser(UserDTO userDTO){
         return modelMapper.map(userDTO, User.class);

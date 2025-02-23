@@ -6,6 +6,7 @@ import {createRouter, createWebHistory} from "vue-router";
 import Home from "@/pages/Home.vue";
 import Login from "@/pages/Login.vue";
 import Registration from "@/pages/Registration.vue";
+import apiClient from './axios.js';
 
 const app = createApp(App)
 
@@ -22,12 +23,14 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token')
+  const token = localStorage.getItem('authToken')
   if (to.meta.requiresAuth && !token) {
     return next({ name: 'Login' })
   }
   next()
 })
+
+app.config.globalProperties.$axios = apiClient;
 
 app.use(router)
 

@@ -28,10 +28,10 @@ public class Video {
     @Column(name = "video_id")
     private long videoId;
 
-    @Column(name = "title")
+    @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "video_path")
+    @Column(name = "video_path", nullable = false, unique = true)
     private String videoPath;
 
     @Column(name = "subtitles_original_path")
@@ -44,10 +44,10 @@ public class Video {
     @Column(columnDefinition = "jsonb")
     private JsonNode proposals;
 
-    @Column(name = "original_text")
+    @Column(name = "original_text", columnDefinition = "TEXT")
     private String originalText;
 
-    @Column(name = "translate_text")
+    @Column(name = "translate_text", columnDefinition = "TEXT")
     private String translateText;
 
     @Column(name = "status")

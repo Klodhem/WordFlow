@@ -8,19 +8,34 @@ const router = useRouter()
 const username = ref('')
 const email = ref('')
 const password = ref('')
+const confirmPassword = ref('')
 
 const registrationForm = async () => {
   try {
+    if (password.value !== confirmPassword.value) {
+      alert('Пароли не совпадают!');
+      return;
+    }
+
     const response = await axios.post('http://localhost:8080/auth/registration', {
       username: username.value,
       email: email.value,
       password: password.value
     })
-    localStorage.setItem('token', response.data.token)
+    const token = response.data['jwt-token'];
+    if (!token) {
+      console.error('Токен отсутствует в ответе сервера');
+      return;
+    }
+
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const expirationTime = payload.exp * 1000;
+    localStorage.setItem('authToken', token);
+    localStorage.setItem('tokenExpiration', expirationTime);
     await router.push({name: 'Home'})
   } catch (err) {
     console.error(err)
-    alert('Ошибка авторизации')
+    alert('Ошибка регистрации')
   }
 }
 </script>
@@ -48,7 +63,7 @@ const registrationForm = async () => {
             </div>
             <div class="mb-4">
               <label for="confirm_password" class="block mb-2 text-sm font-medium text-gray-900 ">Повторите пароль</label>
-              <input type="password" id="confirm_password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " placeholder="•••••••••" required />
+              <input type="password" id="confirm_password" v-model="confirmPassword" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " placeholder="•••••••••" required />
             </div>
             <button type="submit" class="w-full text-gray-50 border-gray-700 bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Зарегистрироваться</button>
             <p class="text-sm font-light text-gray-500">

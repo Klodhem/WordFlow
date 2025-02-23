@@ -28,7 +28,6 @@ public class AWSServiceImpl implements AWSService {
     @YandexS3Client
     private final S3Client s3Client;
 
-
     @Override
     public void uploadToStorage(String fileName) {
         try {

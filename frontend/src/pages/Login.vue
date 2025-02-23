@@ -14,7 +14,17 @@ const loginForm = async () => {
       username: username.value,
       password: password.value
     })
-    localStorage.setItem('token', response.data.token)
+    const token = response.data['jwt-token'];
+    if (!token) {
+      console.error('Токен отсутствует в ответе сервера');
+      return;
+    }
+
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const expirationTime = payload.exp * 1000;
+
+    localStorage.setItem('authToken', token);
+    localStorage.setItem('tokenExpiration', expirationTime);
     await router.push({name: 'Home'})
   } catch (err) {
     console.error(err)

@@ -6,6 +6,7 @@ import git.klodhem.backend.dto.ResultSpeechRecognitionDTO;
 import git.klodhem.backend.dto.SpeechRecognitionDTO;
 import git.klodhem.backend.services.RecognitionService;
 import git.klodhem.backend.util.Language;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.json.JSONArray;
@@ -36,7 +37,6 @@ public class RecognitionServiceImpl implements RecognitionService {
 
     @Value("${urlRecognitionSpeech}")
     private String urlRecognitionSpeech;
-
 
     @Override
     public String startAsyncRecognition(String fileUri, Language language) {
@@ -165,7 +165,6 @@ public class RecognitionServiceImpl implements RecognitionService {
                 throw new RuntimeException("Превышено время ожидания распознавания.");
             }
         }
-
         return getRecognitionResult(operationId);
     }
 }

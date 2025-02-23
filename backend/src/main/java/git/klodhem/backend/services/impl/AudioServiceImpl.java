@@ -34,9 +34,6 @@ public class AudioServiceImpl implements AudioService {
     @Value("${app.upload.directory}")
     private String DIRECTORY_UPLOAD;
 
-    private final AWSServiceImpl awsServiceImpl;
-
-
     public void convertRawToWav(String inputFilePath, String outputFilePath){
         try {
             FFmpeg ffmpeg = new FFmpeg(ffmpegPath);
@@ -62,8 +59,6 @@ public class AudioServiceImpl implements AudioService {
 
     @Override
     public String extractAudioFromVideo(String fileName, String type) {
-//        String baseName = videoPath.replaceFirst("[.][^.]+$", "")
-//                .substring(videoPath.lastIndexOf("/") + 1);
         String audioPath = fileName+"_audio.wav";
         try {
             FFmpeg ffmpeg = new FFmpeg(ffmpegPath);
@@ -93,7 +88,6 @@ public class AudioServiceImpl implements AudioService {
                     log.debug("Прогресс: {} ms", progress.out_time_ns / 1_000_000);
                 }
             });
-
             job.run();
             if (job.getState() == FFmpegJob.State.FAILED) {
                 throw new IOException("Ошибка при извлечении аудио");

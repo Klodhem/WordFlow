@@ -2,7 +2,8 @@ package git.klodhem.backend.config;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import git.klodhem.backend.security.JWTUtil;
-import git.klodhem.backend.services.UserDetailsServiceImpl;
+import git.klodhem.backend.security.UserDetailsImpl;
+import git.klodhem.backend.services.impl.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,10 +34,10 @@ public class JWTFilter extends OncePerRequestFilter {
             } else {
                 try {
                     String username = jwtUtil.validateTokenAndRetrieveClaim(token);
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                    UserDetailsImpl userDetails = userDetailsService.loadUserByUsername(username);
 
                     UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(userDetails, null,
+                            new UsernamePasswordAuthenticationToken(userDetails.getUser(), null,
                                     userDetails.getAuthorities());
                     if (SecurityContextHolder.getContext().getAuthentication() == null) {
                         SecurityContextHolder.getContext().setAuthentication(authentication);

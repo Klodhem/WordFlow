@@ -12,7 +12,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
-import org.checkerframework.common.aliasing.qual.Unique;
 
 import java.util.List;
 
@@ -26,17 +25,15 @@ public class User {
     @Column(name = "user_id")
     private long userId;
 
-    @Column(name = "username")
+    @Column(name = "username", nullable = false, unique = true)
     @NotEmpty(message = "Поле не должно быть пустым")
-    @Unique
     private String username;
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false, unique = true)
     @Email
-    @Unique
     private String email;
 
-    @Column(name = "password")
+    @Column(name = "password", nullable = false, unique = true)
     private String password;
 
     @Column(name = "role")

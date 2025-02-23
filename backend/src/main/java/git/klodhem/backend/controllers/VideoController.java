@@ -120,7 +120,7 @@ public class VideoController {
 
             long requestedSize = end - start + 1;
             long rangeLength = Math.max(requestedSize, CHUNK_SIZE);
-            rangeLength = Math.min(rangeLength, contentLength - start); // Ограничиваем размер сегмента
+            rangeLength = Math.min(rangeLength, contentLength - start);
             region = new ResourceRegion(videoResource, start, rangeLength);
         } else {
             region = new ResourceRegion(videoResource, 0, contentLength);
