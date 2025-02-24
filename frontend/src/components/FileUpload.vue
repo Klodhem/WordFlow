@@ -37,7 +37,7 @@ const { proxy } = getCurrentInstance();
             'Content-Type': 'multipart/form-data'
           },
           onUploadProgress: progressEvent => {
-            console.log(`Uploaded ${Math.round((progressEvent.loaded / progressEvent.total) * 100)}%`);
+            console.log(`Загружено ${Math.round((progressEvent.loaded / progressEvent.total) * 100)}%`);
           }
         });
         uploadStatus.value = 'Файл успешно загружен!';

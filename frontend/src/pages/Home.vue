@@ -277,8 +277,8 @@ const fetchWithAuth = async (url) => {
     <table class="rounded-lg w-full table-fixed divide-y divide-gray-200 bg-gray-500">
       <thead>
       <tr>
-        <th class="w-1/2 px-4 md:px-6 py-3 text-left text-xl font-medium uppercase tracking-wider">Оригинал</th>
-        <th class="w-1/2 px-4 md:px-6 py-3-left text-xl font-medium uppercase tracking-wider">Перевод</th>
+        <th class="w-1/2 px-4 md:px-6 py-3  text-xl font-medium uppercase tracking-wider text-gray-50">Оригинал</th>
+        <th class="w-1/2 px-4 md:px-6 py-3 text-xl font-medium uppercase tracking-wider text-gray-50">Перевод</th>
       </tr>
       </thead>
       <tbody class="bg-gray-200 divide-y divide-gray-200">
