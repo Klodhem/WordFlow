@@ -1,4 +1,5 @@
 <script setup>
+
 import FileUpload from "@/components/FileUpload.vue";
 import {getCurrentInstance, onMounted, ref} from "vue";
 const { proxy } = getCurrentInstance();
@@ -291,7 +292,7 @@ const fetchWithAuth = async (url) => {
           <div class="flex items-center w-full gap-2">
             <span class="flex-1">{{ pair.original }}</span>
             <button @click="playSynthesizedSpeech(pair.original)">
-              {{ '▶' }}
+              <span class="mdi mdi-play-circle"></span>
             </button>
           </div>
         </td>
@@ -301,7 +302,7 @@ const fetchWithAuth = async (url) => {
             <button
               @click="playSynthesizedSpeech(pair.translated)"
             >
-              {{  '▶' }}
+              <span class="mdi mdi-play-circle"></span>
             </button>
           </div>
         </td>
@@ -310,3 +311,9 @@ const fetchWithAuth = async (url) => {
     </table>
   </div>
 </template>
+<style>
+
+.mdi {
+  font-size: 24px;
+}
+</style>

@@ -39,8 +39,6 @@ public class VideoProcessingServiceImpl implements VideoProcessingService {
 
     private final TranslateService translateService;
 
-    private final LocalStorageService localStorageService;
-
     private final VideoService videoService;
 
     private final JsonUtil jsonUtil;

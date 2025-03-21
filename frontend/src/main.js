@@ -7,6 +7,7 @@ import Home from "@/pages/Home.vue";
 import Login from "@/pages/Login.vue";
 import Registration from "@/pages/Registration.vue";
 import apiClient from './axios.js';
+import '@mdi/font/css/materialdesignicons.css'
 
 const app = createApp(App)
 

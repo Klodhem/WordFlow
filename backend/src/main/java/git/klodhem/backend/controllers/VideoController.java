@@ -45,8 +45,8 @@ public class VideoController {
                                   @RequestParam(required = false) LanguageTranslate languageTranslate) {
         String fileName = file.getOriginalFilename();
         //todo
-        if (videoService.getVideoFile(fileName)!=null)
-            return false;
+//        if (videoService.getVideoFile(fileName)!=null)
+//            return false;
         return videoProcessingService.videoProcessing(file, fileName, language, languageTranslate);
     }
 
