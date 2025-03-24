@@ -84,7 +84,6 @@ const getVideos = async () => {
   try {
     const response = await proxy.$axios.get('http://localhost:8080/video/getVideos')
     videos.value = response.data
-    console.log(videos.value[1])
   } catch (err) {
     console.log('Ошибка запроса:', err.message)
   }

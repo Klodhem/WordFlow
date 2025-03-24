@@ -1,12 +1,5 @@
 <script setup>
-import { useRouter } from 'vue-router'
 
-const router = useRouter()
-
-const logout = () => {
-  localStorage.removeItem('token')
-  router.push({ name: 'Login' })
-}
 </script>
 
 <template>
@@ -33,12 +26,12 @@ const logout = () => {
 <!--          <span>Закладки</span>-->
 <!--        </li>-->
 <!--      </router-link>-->
-      <button @click="logout" class="px-4 py-2 bg-red-500 text-white rounded">
-        Выйти
-      </button>
+
       <li class="flex items-center cursor-pointer gap-3 text-gray-500 hover:text-black">
-<!--        <img src="/profile.svg" alt="Profile">-->
-        <span>Профиль</span>
+        <router-link to="/Profile" class="flex items-center gap-3">
+          <!-- <img src="/profile.svg" alt="Profile"> -->
+          <span>Профиль</span>
+        </router-link>
       </li>
     </ul>
   </header>

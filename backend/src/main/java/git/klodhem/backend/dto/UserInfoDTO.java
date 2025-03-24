@@ -8,7 +8,7 @@ import org.checkerframework.common.aliasing.qual.Unique;
 
 @Getter
 @Setter
-public class UserDTO {
+public class UserInfoDTO {
     @NotEmpty(message = "Поле не должно быть пустым")
     @Unique
     private String username;
@@ -16,6 +16,4 @@ public class UserDTO {
     @Email
     @Unique
     private String email;
-
-    private String password;
 }

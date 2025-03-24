@@ -1,7 +1,7 @@
 package git.klodhem.backend.controllers;
 
 import git.klodhem.backend.dto.AuthenticationDTO;
-import git.klodhem.backend.dto.UserDTO;
+import git.klodhem.backend.dto.UserLoginDTO;
 import git.klodhem.backend.exception.UserLoginException;
 import git.klodhem.backend.exception.UserRegistrationException;
 import git.klodhem.backend.model.User;
@@ -37,9 +37,9 @@ public class AuthController {
     private final UserValidator userValidator;
 
     @PostMapping("/registration")
-    public Map<String,String> performRegistration(@RequestBody @Valid UserDTO userDTO,
+    public Map<String,String> performRegistration(@RequestBody @Valid UserLoginDTO userLoginDTO,
                                                   BindingResult bindingResult){
-        User user = convertToUser(userDTO);
+        User user = convertToUser(userLoginDTO);
         userValidator.validate(user, bindingResult);
 //        String field = bindingResult.getFieldError().getField();
         if (bindingResult.hasErrors()) {
@@ -68,7 +68,7 @@ public class AuthController {
         return Map.of("jwt-token", token);
     }
 
-    private User convertToUser(UserDTO userDTO){
-        return modelMapper.map(userDTO, User.class);
+    private User convertToUser(UserLoginDTO userLoginDTO){
+        return modelMapper.map(userLoginDTO, User.class);
     }
 }

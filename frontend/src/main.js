@@ -8,12 +8,14 @@ import Login from "@/pages/Login.vue";
 import Registration from "@/pages/Registration.vue";
 import apiClient from './axios.js';
 import '@mdi/font/css/materialdesignicons.css'
+import Profile from "@/pages/Profile.vue";
 
 const app = createApp(App)
 
 
 const routes =[
-  {path: '/', name: 'Home',component: Home, meta: { requiresAuth: true }},
+  {path: '/', name: 'Home', component: Home, meta: { requiresAuth: true }},
+  {path: '/Profile', name: 'Profile', component: Profile, meta: { requiresAuth: true }},
   {path: '/Login', name: 'Login', component: Login},
   {path: '/Registration', name: 'Registration', component: Registration}
 ]
