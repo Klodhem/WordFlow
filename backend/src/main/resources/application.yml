@@ -10,10 +10,14 @@ spring:
   jpa:
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 50
+        #        dialect: org.hibernate.dialect.PostgreSQLDialect
         show_sql: true
         hbm2ddl:
           auto: update
+        order_updates: true
+
   servlet:
     multipart:
       max-file-size: 100MB
@@ -58,6 +62,7 @@ REGION: "ru-central1"
 S3_ENDPOINT: "https://storage.yandexcloud.net"
 yandex.speech.api.key: ${YANDEX_SPEECH_API_KEY}
 folderId: ${FOLDER_ID}
+modelUri: "gpt://${FOLDER_ID}/yandexgpt/rc"
 urlTranslateText: "https://translate.api.cloud.yandex.net/translate/v2/translate"
 urlSynthesisSpeech: "https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize"
 urlRecognitionSpeech: "https://storage.yandexcloud.net/video.translate/"

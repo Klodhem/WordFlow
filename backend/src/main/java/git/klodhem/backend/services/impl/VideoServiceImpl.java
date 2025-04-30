@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import git.klodhem.backend.dto.SubtitleDTO;
 import git.klodhem.backend.dto.VideoDTO;
 import git.klodhem.backend.exception.VideoFileException;
+import git.klodhem.backend.model.Answer;
+import git.klodhem.backend.model.Question;
 import git.klodhem.backend.model.User;
 import git.klodhem.backend.model.Video;
 import git.klodhem.backend.repositories.VideosRepository;
@@ -169,6 +171,58 @@ public class VideoServiceImpl implements VideoService {
         }
         JsonNode proposals = optionalVideo.get().getProposals();
         return proposalMapper.mapTranslateProposals(proposals);
+    }
+
+    @Override
+    public String getTextVideo(long id) {
+        Optional<Video> optionalVideo = videosRepository.findByOwnerUserIdAndVideoId(getCurrentUser().getUserId(), id);
+
+        if (optionalVideo.isEmpty()) {
+            log.warn("Запись о видео не найдена в БД");
+            throw new VideoFileException("Запись о видео не найдена в БД");
+        }
+        return optionalVideo.get().getOriginalText();
+    }
+
+    public void saveTestFromVideo(long id, List<Question> questions) {
+        Optional<Video> optionalVideo = videosRepository.findByOwnerUserIdAndVideoId(getCurrentUser().getUserId(), id);
+
+        if (optionalVideo.isEmpty()) {
+            log.warn("Запись о видео не найдена в БД");
+            throw new VideoFileException("Запись о видео не найдена в БД");
+        }
+        Video video = optionalVideo.get();
+
+        if (video.getQuestions() != null) {
+            video.getQuestions().clear();
+        } else {
+            video.setQuestions(new ArrayList<>());
+        }
+
+        for (Question question : questions) {
+            question.setVideo(video);
+
+            for (Answer answer : question.getAnswers()) {
+                answer.setQuestion(question);
+            }
+            video.getQuestions().add(question);
+        }
+
+        videosRepository.save(video);
+    }
+
+    public Video getVideoById(long id) {
+        Optional<Video> optionalVideo = videosRepository.findByOwnerUserIdAndVideoId(getCurrentUser().getUserId(), id);
+        if (optionalVideo.isEmpty()) {
+            log.warn("Запись о видео не найдена в БД");
+            throw new VideoFileException("Запись о видео не найдена в БД");
+        }
+        return optionalVideo.get();
+    }
+
+    public boolean checkAccessFromVideoById(long id) {
+        Optional<Video> optionalVideo = videosRepository.findByOwnerUserIdAndVideoId(getCurrentUser().getUserId(), id);
+        return optionalVideo.isPresent();
     }
 
     private VideoDTO convertToVideoDTO(Video video) {

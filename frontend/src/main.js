@@ -7,6 +7,7 @@ import Home from "@/pages/Home.vue";
 import Login from "@/pages/Login.vue";
 import Registration from "@/pages/Registration.vue";
 import apiClient from './axios.js';
+import { autoAnimatePlugin } from '@formkit/auto-animate/vue'
 import '@mdi/font/css/materialdesignicons.css'
 import Profile from "@/pages/Profile.vue";
 
@@ -36,5 +37,6 @@ router.beforeEach((to, from, next) => {
 app.config.globalProperties.$axios = apiClient;
 
 app.use(router)
+app.use(autoAnimatePlugin)
 
 app.mount('#app')

@@ -194,7 +194,7 @@ onMounted(() => {
       </select>
     </div>
     <div class="flex-1">
-      <label for="languageTranslate" class="block mb-2 text-sm font-medium text-gray-900">Перевод на</label>
+      <label for="languageTranslate" class="block mb-2 text-sm font-medium text-gray-900">Перевод субтитров на</label>
       <select id="languageTranslate" v-model="selectedTranslateLanguage" class="w-full bg-gray-200 border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-gray-950 focus:border-gray-950 block p-2.5">
         <option v-for="lang in languageTranslate" :key="lang.code" :value="lang.code">
           {{ lang.name }}

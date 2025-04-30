@@ -5,6 +5,7 @@ import git.klodhem.backend.dto.ResponseTranslateDTO;
 import git.klodhem.backend.dto.ResultSpeechRecognitionDTO;
 import git.klodhem.backend.dto.SubtitleDTO;
 import git.klodhem.backend.services.RecognitionService;
+import git.klodhem.backend.services.TestService;
 import git.klodhem.backend.services.TranslateService;
 import git.klodhem.backend.services.VideoProcessingService;
 import git.klodhem.backend.services.VideoService;
@@ -41,10 +42,12 @@ public class VideoProcessingServiceImpl implements VideoProcessingService {
 
     private final VideoService videoService;
 
+    private final TestService testService;
+
     private final JsonUtil jsonUtil;
 
     @Override
-    public boolean videoProcessing(MultipartFile file, String title, Language language, LanguageTranslate languageTranslate) {
+    public boolean videoProcessing(MultipartFile file, String title, Language language, LanguageTranslate languageTranslate, boolean generateTest) {
         String fileName = UUID.randomUUID().toString();
 //        localStorageService.uploadToStorage(file, uuidName);
 
@@ -77,6 +80,9 @@ public class VideoProcessingServiceImpl implements VideoProcessingService {
         jsonNode = jsonUtil.addTranslate(jsonNode, languageTranslate, subtitleDTOS);
         String translateVtt = subtitlesUtil.createVttSubtitles(subtitleDTOS, fileName, languageTranslate.getCode());
         videoService.saveProposalsAndTexts(videoId, jsonNode, originalText, translateText, originalVtt, translateVtt);
+        if (generateTest) {
+            testService.generatedTest(videoId);
+        }
         return true;
     }
 

@@ -1,0 +1,18 @@
+Create a test based on the given text.
+The test should contain different types of questions: single-choice and multiple-choice.
+Anonymize the test. It should not contain names, titles, addresses, or other personal information.
+Answer only in the format given, without unnecessary explanation.
+
+FORMAT:
+Type: [single/multiple].
+Question: <text>
+Answers: [answer1·<true/false>|answer2·<true/false>|answer3·<true/false>|answer4·<true/false>].
+
+EXAMPLE:
+Type: single
+Question: Which planet is the closest planet to the sun?
+Answers: [Venus·false|Mercury·true|Earth·false|Mars·false].
+
+Type: multiple
+Question: Which planets are gas giants?
+Answers: [Jupiter·true|Mars·false|Saturn·true|Neptune·true].

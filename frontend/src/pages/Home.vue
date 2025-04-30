@@ -1,12 +1,14 @@
 <script setup>
 
 import FileUpload from "@/components/FileUpload.vue";
-import {getCurrentInstance, onMounted, ref} from "vue";
+import {getCurrentInstance, onMounted, reactive, ref} from "vue";
+import { vAutoAnimate } from '@formkit/auto-animate'
 const { proxy } = getCurrentInstance();
 
 const userText = ref('')
 
 const videos = ref([])
+const test = ref([])
 
 const videoPlayer = ref(null);
 const selectedVideo = ref(null);
@@ -24,6 +26,9 @@ const foundTime = ref(null);
 const errorMessage = ref(null);
 
 const intervalId = ref(null);
+
+const showTest = ref(false)
+const showTableDictionary = ref(false)
 
 const selectVideo = async video => {
   if (video.status === 'OK') {
@@ -49,6 +54,7 @@ const selectVideo = async video => {
       }
       videoPlayer.value.load();
     }
+    await getTest(video)
   }
 }
 
@@ -88,6 +94,49 @@ const getVideos = async () => {
     console.log('Ошибка запроса:', err.message)
   }
 }
+
+const getTest = async video => {
+  try {
+    console.log(video.videoId)
+    const response = await proxy.$axios.get('http://localhost:8080/test/'+video.videoId)
+    test.value = response.data
+    test.value.forEach(q => {
+      userAnswers[q.questionId] = q.type === 'SINGLE' ? null : []
+    })
+
+  } catch (err) {
+    console.log('Ошибка запроса:', err.message)
+  }
+}
+
+const userAnswers = reactive({});
+
+const submitTest = async () => {
+  const questions = test.value.map(q => {
+    const sel = userAnswers[q.questionId]
+    const answers = q.answers.map(ans => ({
+      ...ans,
+      correct:
+        q.type === 'SINGLE'
+          ? sel === ans.answerId
+          : sel.includes(ans.answerId)
+    }))
+    return {...q, answers}
+  })
+
+  try {
+    const resp = await proxy.$axios.post('http://localhost:8080/test/solution', questions,
+      {
+        params: {videoId: selectedVideo.value.videoId},
+        headers: {'Content-Type': 'application/json'}
+      }
+    )
+  } catch (err) {
+    console.error(err)
+    alert('Не удалось отправить тест')
+  }
+};
+
 onMounted(() => {
   getVideos()
   intervalId.value = setInterval(getVideos, 120000)
@@ -274,40 +323,116 @@ const fetchWithAuth = async (url) => {
   </div>
 
   <div v-if="selectedVideo" class="m-4 md:m-8 overflow-x-auto">
-    <table class="rounded-lg w-full table-fixed divide-y divide-gray-200 bg-gray-500">
-      <thead>
-      <tr>
-        <th class="w-1/2 px-4 md:px-6 py-3  text-xl font-medium uppercase tracking-wider text-gray-50">Оригинал</th>
-        <th class="w-1/2 px-4 md:px-6 py-3 text-xl font-medium uppercase tracking-wider text-gray-50">Перевод</th>
-      </tr>
-      </thead>
-      <tbody class="bg-gray-200 divide-y divide-gray-200">
-      <tr
-        v-for="(pair, index) in testPairs"
-        :key="index"
-        class="group hover:bg-gray-300 transition-colors"
-      >
-        <td class="px-2 md:px-4 py-3 align-top border-r-2 border-gray-200 break-words">
-          <div class="flex items-center w-full gap-2">
-            <span class="flex-1">{{ pair.original }}</span>
-            <button @click="playSynthesizedSpeech(pair.original)">
-              <span class="mdi mdi-play-circle"></span>
-            </button>
+
+    <div class="bg-gray-200 rounded shadow mb-5">
+      <h2
+        class="text-2xl font-bold cursor-pointer select-none"
+        @click="showTest = !showTest">
+        Тест
+        <span class="ml-2">
+        {{ showTest ? '▾' : '▸' }}
+      </span>
+      </h2>
+
+      <div v-auto-animate class="mt-2 overflow-x-hidden">
+        <div
+          v-if="showTest"
+          class="rounded-lg shadow-lg overflow-hidden bg-white">
+          <div v-if="test.length !== 0">
+            <form @submit.prevent="submitTest">
+              <fieldset v-for="(q, i) in test" :key="q.questionId" style="margin-bottom:1em;">
+                <legend>{{ i + 1 }}. {{ q.text }}</legend>
+
+                <div v-if="q.type === 'SINGLE'">
+                  <label v-for="ans in q.answers" :key="ans.answerId" style="display:block;">
+                    <input
+                      type="radio"
+                      :name="'q' + q.questionId"
+                      :value="ans.answerId"
+                      v-model="userAnswers[q.questionId]"
+                    />
+                    {{ ans.text }}
+                  </label>
+                </div>
+
+                <div v-else-if="q.type === 'MULTIPLE'">
+                  <label v-for="ans in q.answers" :key="ans.answerId" style="display:block;">
+                    <input
+                      type="checkbox"
+                      :value="ans.answerId"
+                      v-model="userAnswers[q.questionId]"
+                    />
+                    {{ ans.text }}
+                  </label>
+                </div>
+              </fieldset>
+
+              <button type="submit" class="px-3 py-1 text-white disabled:bg-slate-600 bg-gray-700 hover:bg-gray-800 rounded-lg text-sm relative z-10">Завершить тест</button>
+            </form>
           </div>
-        </td>
-        <td class="px-2 md:px-4 py-3 align-top break-words">
-          <div class="flex items-center w-full gap-2">
-            <span class="flex-1">{{ pair.translated }}</span>
-            <button
-              @click="playSynthesizedSpeech(pair.translated)"
+          <div v-if="test.length === 0">
+            <p>По данному видео еще не сгенерирован тест.</p>
+            <button class="px-3 py-1 text-white disabled:bg-slate-600 bg-gray-700 hover:bg-gray-800 rounded-lg text-sm relative z-10">Сгенерировать</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="bg-gray-200 rounded shadow">
+      <h2
+        class="text-2xl font-bold cursor-pointer select-none"
+        @click="showTableDictionary = !showTableDictionary">
+        Словарь
+        <span class="ml-2">
+        {{ showTableDictionary ? '▾' : '▸' }}
+      </span>
+      </h2>
+
+      <div v-auto-animate class="mt-2 overflow-x-hidden">
+        <div
+          v-if="showTableDictionary"
+          class="rounded-lg shadow-lg overflow-hidden bg-white"
+        >
+          <table class="w-full table-fixed divide-y divide-gray-200">
+            <thead class="bg-gray-500">
+            <tr>
+              <th class="w-1/2 px-4 py-3 text-xl font-medium uppercase text-gray-50">
+                Оригинал
+              </th>
+              <th class="w-1/2 px-4 py-3 text-xl font-medium uppercase text-gray-50">
+                Перевод
+              </th>
+            </tr>
+            </thead>
+            <tbody class="bg-gray-200 divide-y divide-gray-200">
+            <tr
+              v-for="(pair, idx) in testPairs"
+              :key="idx"
+              class="group hover:bg-gray-300 transition-colors"
             >
-              <span class="mdi mdi-play-circle"></span>
-            </button>
-          </div>
-        </td>
-      </tr>
-      </tbody>
-    </table>
+              <td class="px-2 py-3 align-top border-r-2 border-gray-200 break-words">
+                <div class="flex items-center gap-2">
+                  <span class="flex-1">{{ pair.original }}</span>
+                  <button @click="playSynthesizedSpeech(pair.original)">
+                    <span class="mdi mdi-play-circle"></span>
+                  </button>
+                </div>
+              </td>
+              <td class="px-2 py-3 align-top break-words">
+                <div class="flex items-center gap-2">
+                  <span class="flex-1">{{ pair.translated }}</span>
+                  <button @click="playSynthesizedSpeech(pair.translated)">
+                    <span class="mdi mdi-play-circle"></span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <style>

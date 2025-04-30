@@ -1,11 +1,11 @@
 package git.klodhem.backend.controllers;
 
+import git.klodhem.backend.dto.TranslateProposalDTO;
 import git.klodhem.backend.dto.VideoDTO;
 import git.klodhem.backend.services.VideoProcessingService;
 import git.klodhem.backend.services.VideoService;
 import git.klodhem.backend.util.Language;
 import git.klodhem.backend.util.LanguageTranslate;
-import git.klodhem.backend.dto.TranslateProposalDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.FileSystemResource;
@@ -42,12 +42,13 @@ public class VideoController {
 
     @PostMapping("/upload")
     public boolean upload(@RequestParam("file") MultipartFile file, @RequestParam Language language,
-                                  @RequestParam(required = false) LanguageTranslate languageTranslate) {
+                                  @RequestParam(required = false) LanguageTranslate languageTranslate,
+                          @RequestParam(required = false) boolean generateTest) {
         String fileName = file.getOriginalFilename();
         //todo
 //        if (videoService.getVideoFile(fileName)!=null)
 //            return false;
-        return videoProcessingService.videoProcessing(file, fileName, language, languageTranslate);
+        return videoProcessingService.videoProcessing(file, fileName, language, languageTranslate, generateTest);
     }
 
     @GetMapping("/getVideos")
