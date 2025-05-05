@@ -38,4 +38,9 @@ public class TestController {
                                  @RequestParam("videoId") long videoId){
         return testService.solutionTest(questionDTOS, videoId);
     }
+
+    @GetMapping("/history")
+    public List<SolutionDTO> getTestHistory(@RequestParam("videoId") long videoId){
+        return testService.getHistorySolution(videoId);
+    }
 }

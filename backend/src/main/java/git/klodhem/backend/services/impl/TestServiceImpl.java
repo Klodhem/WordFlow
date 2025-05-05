@@ -113,6 +113,14 @@ public class TestServiceImpl implements TestService {
         return SolutionToSolutionDTO(solution);
     }
 
+    public List<SolutionDTO> getHistorySolution(long videoId){
+        if (!videoService.checkAccessFromVideoById(videoId))
+            return null;
+
+        List<Solution> solutions = solutionRepository.findByVideo_VideoId(videoId);
+        return convertSolutionsToDTOs(solutions);
+    }
+
     private List<QuestionDTO> QuestionsToQuestionsDTO(List<Question> questions) {
         return questions.stream()
                 .map(q -> modelMapper.map(q, QuestionDTO.class))
@@ -154,4 +162,11 @@ public class TestServiceImpl implements TestService {
         solution.setUserAnswerSheetList(uasEntities);
         return solution;
     }
+
+    private List<SolutionDTO> convertSolutionsToDTOs(List<Solution> solutions) {
+        return solutions.stream()
+                .map(this::SolutionToSolutionDTO)
+                .collect(Collectors.toList());
+    }
+
 }
