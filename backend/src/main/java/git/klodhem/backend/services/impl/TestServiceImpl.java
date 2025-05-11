@@ -62,8 +62,14 @@ public class TestServiceImpl implements TestService {
         }
 
         List<Question> solutionQuestions = QuestionsDTOToQuestions(questionSolutionDTOS);
-
         List<Question> originalQuestions = questionsRepository.findByVideo_VideoId(id);
+        Solution solution = makingGrade(id, solutionQuestions, originalQuestions);
+        solutionRepository.save(solution);
+
+        return SolutionToSolutionDTO(solution);
+    }
+
+    private static Solution makingGrade(long id, List<Question> solutionQuestions, List<Question> originalQuestions) {
         Map<Long, Question> solutionQuestionHashMap = new HashMap<>();
         solutionQuestions.forEach(solutionQuestion -> {
             solutionQuestionHashMap.put(solutionQuestion.getQuestionId(), solutionQuestion);
@@ -107,10 +113,7 @@ public class TestServiceImpl implements TestService {
 
         solution.setMark((byte) solutionMark);
         solution.setDateTime(LocalDateTime.now());
-
-        solutionRepository.save(solution);
-
-        return SolutionToSolutionDTO(solution);
+        return solution;
     }
 
     public List<SolutionDTO> getHistorySolution(long videoId){

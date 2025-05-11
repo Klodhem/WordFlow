@@ -181,6 +181,18 @@ function tryTestAgain() {
   formKey.value++;
 }
 
+const generateTest = async () => {
+  try {
+    await proxy.$axios.post('http://localhost:8080/test/generate',{},
+      {
+        params: {videoId: selectedVideo.value.videoId},
+      });
+
+  } catch (err) {
+    console.log('Ошибка запроса:', err.message)
+  }
+}
+
 onMounted(() => {
   getVideos()
   intervalId.value = setInterval(getVideos, 120000)
@@ -501,7 +513,7 @@ const mergedResults = computed(() =>
           </div>
           <div v-if="test.length === 0" class="ml-4">
             <p class="mt-2 text-lg font-semibold tracking-tight text-gray-900 ">По данному видео еще не сгенерирован тест.</p>
-            <button class="mt-3 mb-4 font-semibold px-3 py-3 text-white disabled:bg-slate-600 bg-gray-700 hover:bg-gray-800 rounded-lg text-sm relative z-10">Сгенерировать</button>
+            <button @click="generateTest" class="mt-3 mb-4 font-semibold px-3 py-3 text-white disabled:bg-slate-600 bg-gray-700 hover:bg-gray-800 rounded-lg text-sm relative z-10">Сгенерировать</button>
           </div>
         </div>
       </div>
