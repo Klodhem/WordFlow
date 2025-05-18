@@ -73,41 +73,41 @@ public class VideoController {
         return ResponseEntity.ok(time);
     }
 
-    @GetMapping("/originalSubtitle/{name}")
-    public ResponseEntity<Resource> originalSubtitle(@PathVariable String name){
-        File file = videoService.getVttFile(name, "original");
+    @GetMapping("/originalSubtitle/{videoId}")
+    public ResponseEntity<Resource> originalSubtitle(@PathVariable long videoId){
+        File file = videoService.getVttFile(videoId, "original");
         if (!file.exists()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
         Resource resource = new FileSystemResource(file);
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + name + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; fileId=\"" + videoId + "\"")
                 .body(resource);
     }
 
-    @GetMapping("/translateSubtitle/{name}")
-    public ResponseEntity<Resource> translateSubtitle(@PathVariable String name){
-        File file = videoService.getVttFile(name, "translate");
+    @GetMapping("/translateSubtitle/{videoId}")
+    public ResponseEntity<Resource> translateSubtitle(@PathVariable long videoId){
+        File file = videoService.getVttFile(videoId, "translate");
         if (!file.exists()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
         Resource resource = new FileSystemResource(file);
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + name + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; fileId=\"" + videoId + "\"")
                 .body(resource);
     }
 
-    @GetMapping("/dictionary/{name}")
-    public List<TranslateProposalDTO> dictionary(@PathVariable String name){
-        return videoService.getDictionary(name);
+    @GetMapping("/dictionary/{videoId}")
+    public List<TranslateProposalDTO> dictionary(@PathVariable long videoId){
+        return videoService.getDictionary(videoId);
     }
 
 
-    @GetMapping("/watch/{name}")
-    public ResponseEntity<ResourceRegion> streamVideo(@PathVariable String name, @RequestHeader HttpHeaders headers) {
-        File videoFile = videoService.getVideoFile(name);
+    @GetMapping("/watch/{videoId}")
+    public ResponseEntity<ResourceRegion> streamVideo(@PathVariable long videoId, @RequestHeader HttpHeaders headers) {
+        File videoFile = videoService.getVideoFile(videoId);
         long contentLength = videoFile.length();
 
         Resource videoResource = new FileSystemResource(videoFile);

@@ -32,14 +32,14 @@ const openAttempts = ref([])
 const selectVideo = async video => {
   if (video.status === 'OK') {
     try {
-      const response = await proxy.$axios.get('http://localhost:8080/video/dictionary/'+video.title);
+      const response = await proxy.$axios.get('http://localhost:8080/video/dictionary/'+video.videoId);
       testPairs.value = response.data;
     } catch (error) {
       console.log('Ошибка запроса словаря:', error.message)
     }
-    videoUrl.value = await fetchWithAuth(`http://localhost:8080/video/watch/${video.title}`)
-    originalSubtitleUrl.value = await fetchWithAuth(`http://localhost:8080/video/originalSubtitle/${video.title}`)
-    translatedSubtitleUrl.value = await fetchWithAuth(`http://localhost:8080/video/translateSubtitle/${video.title}`)
+    videoUrl.value = await fetchWithAuth(`http://localhost:8080/video/watch/${video.videoId}`)
+    originalSubtitleUrl.value = await fetchWithAuth(`http://localhost:8080/video/originalSubtitle/${video.videoId}`)
+    translatedSubtitleUrl.value = await fetchWithAuth(`http://localhost:8080/video/translateSubtitle/${video.videoId}`)
     selectedVideo.value = video
     if (videoPlayer.value) {
       const videoElement = videoPlayer.value;
@@ -198,28 +198,19 @@ onMounted(() => {
   intervalId.value = setInterval(getVideos, 120000)
 })
 
-onMounted(() => {
-  language.value = [
-    { code: 'EN_US', name: 'Английский (по умолчанию)' },
-    { code: 'DE_DE', name: 'Немецкий' },
-    { code: 'ES_ES', name: 'Испанский' },
-    { code: 'FI_FI', name: 'Финский' },
-    { code: 'FR_FR', name: 'Французский' },
-    // { code: 'HE_HE', name: 'Иврит' },
-    { code: 'IT_IT', name: 'Итальянский' },
-    { code: 'KK_KZ', name: 'Казахский' },
-    { code: 'NL_NL', name: 'Голландский' },
-    { code: 'PL_PL', name: 'Польский' },
-    { code: 'PT_PT', name: 'Португальский' },
-    { code: 'PT_BR', name: 'Бразильский португальский' },
-    { code: 'RU_RU', name: 'Русский' },
-    { code: 'SV_SE', name: 'Шведский' },
-    { code: 'TR_TR', name: 'Турецкий' },
-    { code: 'UZ_UZ', name: 'Узбекский (латиница)' }
-  ]
+onMounted(async () => {
+  try {
+    const [lang] = await Promise.all([
+      fetch('/data/language.json').then(r => r.json())
+    ]);
 
+    language.value = lang;
 
-  selectedLanguage.value = language.value[0].code || null;
+    selectedLanguage.value = language.value[0]?.code || null;
+
+  } catch (e) {
+    console.error('Ошибка загрузки языков:', e);
+  }
 });
 
 const testPairs = ref([]);

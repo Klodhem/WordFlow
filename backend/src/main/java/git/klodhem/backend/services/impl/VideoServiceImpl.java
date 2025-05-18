@@ -81,8 +81,8 @@ public class VideoServiceImpl implements VideoService {
     }
 
 
-    public File getVideoFile(String name) {
-        Optional<Video> optionalVideo = videosRepository.findByOwnerUserIdAndTitle(getCurrentUser().getUserId(), name);
+    public File getVideoFile(long videoId) {
+        Optional<Video> optionalVideo = videosRepository.findByOwnerUserIdAndVideoId(getCurrentUser().getUserId(), videoId);
         if (optionalVideo.isEmpty()) {
             log.warn("Запись о видео не найдена в БД");
             throw new VideoFileException("Запись о видео не найдена в БД");
@@ -137,8 +137,8 @@ public class VideoServiceImpl implements VideoService {
 
 
     @Override
-    public File getVttFile(String name, String type) {
-        Optional<Video> optionalVideo = videosRepository.findByOwnerUserIdAndTitle(getCurrentUser().getUserId(), name);
+    public File getVttFile(long videoId, String type) {
+        Optional<Video> optionalVideo = videosRepository.findByOwnerUserIdAndVideoId(getCurrentUser().getUserId(), videoId);
         if (optionalVideo.isEmpty()) {
             log.warn("Запись о видео не найдена в БД");
             throw new VideoFileException("Запись о видео не найдена в БД");
@@ -163,8 +163,8 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public List<TranslateProposalDTO> getDictionary(String name) {
-        Optional<Video> optionalVideo = videosRepository.findByOwnerUserIdAndTitle(getCurrentUser().getUserId(), name);
+    public List<TranslateProposalDTO> getDictionary(long id) {
+        Optional<Video> optionalVideo = videosRepository.findByOwnerUserIdAndVideoId(getCurrentUser().getUserId(), id);
         if (optionalVideo.isEmpty()) {
             log.warn("Запись о видео не найдена в БД");
             throw new VideoFileException("Запись о видео не найдена в БД");

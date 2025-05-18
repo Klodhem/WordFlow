@@ -18,13 +18,13 @@ public interface VideoService {
 
     List<VideoDTO> getVideosDTO();
 
-    File getVideoFile(String name);
+    File getVideoFile(long videoId);
 
     Long searchPhrase(long videoId, String phrase);
 
-    File getVttFile(String name, String type);
+    File getVttFile(long videoId, String type);
 
-    List<TranslateProposalDTO> getDictionary(String name);
+    List<TranslateProposalDTO> getDictionary(long videoId);
 
     String getTextVideo(long id);
 
