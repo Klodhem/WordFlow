@@ -1,8 +1,8 @@
 <script setup>
-import {getCurrentInstance, onMounted, ref} from "vue";
+import {onMounted, ref} from "vue";
 import { useRouter } from 'vue-router'
+import apiClient from '@/axios.js';
 
-const { proxy } = getCurrentInstance();
 const user = ref({});
 const router = useRouter()
 
@@ -12,7 +12,7 @@ const logout = () => {
 }
 const getUser = async () => {
   try {
-    const response = await proxy.$axios.get('http://localhost:8080/user/getUser')
+    const response = await apiClient.get('/user/getUser')
     user.value = response.data
   } catch (err) {
     console.log('Ошибка запроса:', err.message)

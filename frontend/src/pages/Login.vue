@@ -1,5 +1,5 @@
 <script setup>
-import {ref} from "vue";
+import {reactive, ref} from "vue";
 import {useRouter} from "vue-router";
 import axios from "axios";
 
@@ -8,7 +8,17 @@ const router = useRouter()
 const username = ref('')
 const password = ref('')
 
+const errors = reactive({
+  username: '',
+  password: ''
+});
+
 const loginForm = async () => {
+  errors.username = username.value ? '' : 'Введите имя пользователя';
+  errors.password = password.value ? '' : 'Введите пароль';
+
+  if (errors.username || errors.password) return;
+
   try {
     const response = await axios.post('http://localhost:8080/auth/login', {
       username: username.value,
@@ -41,14 +51,24 @@ const loginForm = async () => {
           <h1 class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl ">
             Авторизация
           </h1>
-          <form class="space-y-4 md:space-y-6" @submit.prevent="loginForm">
+          <form novalidate class="space-y-4 md:space-y-6" @submit.prevent="loginForm">
             <div>
               <label for="username" class="block mb-2 text-sm font-medium text-gray-900 ">Имя пользователя</label>
-              <input type="text" name="username" id="username" v-model="username" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 " placeholder=". . ." required="">
+              <input type="text" name="username" id="username" v-model="username"
+                     :class="errors.username ? 'border-red-500' : 'border-gray-300'"
+                     class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 " placeholder=". . ." required="">
+              <p v-if="errors.username" class="text-red-500 text-sm mt-1">
+                {{ errors.username }}
+              </p>
             </div>
             <div>
               <label for="password" class="block mb-2 text-sm font-medium text-gray-900 ">Пароль</label>
-              <input type="password" name="password" id="password" v-model="password" placeholder="••••••••" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 " required="">
+              <input type="password" name="password" id="password" v-model="password" placeholder="••••••••"
+                     :class="errors.password ? 'border-red-500' : 'border-gray-300'"
+                     class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 " required="">
+              <p v-if="errors.password" class="text-red-500 text-sm mt-1">
+                {{ errors.password }}
+              </p>
             </div>
             <button type="submit" class="w-full text-gray-50 border-gray-700 bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Войти</button>
             <p class="text-sm font-light text-gray-500">

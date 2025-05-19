@@ -1,12 +1,11 @@
 <script setup>
-import {getCurrentInstance, onMounted, ref} from 'vue';
-const { proxy } = getCurrentInstance();
+import {onMounted, ref} from 'vue';
+import apiClient from '@/axios.js';
 
   const emit = defineEmits(['refresh-videos']);
 
   const selectedFileName = ref("");
   const selectedFile = ref(null);
-  const uploadStatus = ref('');
 
   const selectedLanguage = ref(null);
   const selectedTranslateLanguage = ref(null);
@@ -22,7 +21,6 @@ const { proxy } = getCurrentInstance();
 
     const uploadFile = async () => {
       if (!selectedFile.value) {
-        uploadStatus.value = 'Файл не выбран!';
         return;
       }
 
@@ -32,7 +30,7 @@ const { proxy } = getCurrentInstance();
       formData.append('languageTranslate', selectedTranslateLanguage.value);
 
       try {
-        const response = await proxy.$axios.post('http://localhost:8080/video/upload', formData, {
+        await apiClient.post('/video/upload', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           },
@@ -40,11 +38,8 @@ const { proxy } = getCurrentInstance();
             console.log(`Загружено ${Math.round((progressEvent.loaded / progressEvent.total) * 100)}%`);
           }
         });
-        uploadStatus.value = 'Файл успешно загружен!';
-        console.log(response.data);
         emit('refresh-videos');
       } catch (error) {
-        uploadStatus.value = 'Ошибка загрузки: ' + error.message;
         console.error(error);
       }
     };

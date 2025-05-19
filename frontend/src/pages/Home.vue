@@ -1,9 +1,8 @@
 <script setup>
 import FileUpload from "@/components/FileUpload.vue";
-import {computed, getCurrentInstance, onMounted, reactive, ref} from "vue";
+import {computed, onMounted, reactive, ref} from "vue";
 import { vAutoAnimate } from '@formkit/auto-animate'
-
-const { proxy } = getCurrentInstance();
+import apiClient from '@/axios.js';
 const userText = ref('')
 const videos = ref([])
 const test = ref([])
@@ -32,7 +31,7 @@ const openAttempts = ref([])
 const selectVideo = async video => {
   if (video.status === 'OK') {
     try {
-      const response = await proxy.$axios.get('http://localhost:8080/video/dictionary/'+video.videoId);
+      const response = await apiClient.get('/video/dictionary/'+video.videoId);
       testPairs.value = response.data;
     } catch (error) {
       console.log('Ошибка запроса словаря:', error.message)
@@ -62,7 +61,7 @@ const findPhrase = async () => {
   foundTime.value = null;
 
   try {
-    const response = await proxy.$axios.get('http://localhost:8080/video/searchPhrase', {
+    const response = await apiClient.get('/video/searchPhrase', {
       params: {
         videoId: selectedVideo.value.videoId,
         phrase: userText.value
@@ -87,7 +86,7 @@ function seekToTime(seconds) {
 
 const getVideos = async () => {
   try {
-    const response = await proxy.$axios.get('http://localhost:8080/video/getVideos')
+    const response = await apiClient.get('/video/getVideos')
     videos.value = response.data
   } catch (err) {
     console.log('Ошибка запроса:', err.message)
@@ -96,7 +95,7 @@ const getVideos = async () => {
 
 const getTest = async video => {
   try {
-    const response = await proxy.$axios.get('http://localhost:8080/test/'+video.videoId)
+    const response = await apiClient.get('/test/'+video.videoId)
     test.value = response.data
     test.value.forEach(q => {
       userAnswers[q.questionId] = q.type === 'SINGLE' ? null : []
@@ -121,7 +120,7 @@ const submitTest = async () => {
   })
 
   try {
-    const resp = await proxy.$axios.post('http://localhost:8080/test/solution', questions,
+    const resp = await apiClient.post('/test/solution', questions,
       {
         params: {videoId: selectedVideo.value.videoId},
         headers: {'Content-Type': 'application/json'}
@@ -133,7 +132,7 @@ const submitTest = async () => {
     console.error(err)
     alert('Не удалось отправить тест')
   }
-  const responseHistorySolution = await proxy.$axios.get('http://localhost:8080/test/history',
+  const responseHistorySolution = await apiClient.get('/test/history',
     {
       params: {videoId: selectedVideo.value.videoId},
     }
@@ -183,7 +182,7 @@ function tryTestAgain() {
 
 const generateTest = async () => {
   try {
-    await proxy.$axios.post('http://localhost:8080/test/generate',{},
+    await apiClient.post('/test/generate',{},
       {
         params: {videoId: selectedVideo.value.videoId},
       });
@@ -217,7 +216,7 @@ const testPairs = ref([]);
 
 async function playSynthesizedSpeech(text) {
   try {
-    const response = await proxy.$axios.get('http://localhost:8080/speech/synthesize', {
+    const response = await apiClient.get('/speech/synthesize', {
       params: {
         text: text,
         language: selectedLanguage.value,
@@ -334,6 +333,7 @@ const mergedResults = computed(() =>
             <span class="text-sm text-gray-900">{{ speechRate }}</span>
           </div>
           <button @click="handlePlayUserText"
+                  :disabled="!userText.trim()"
                   class="px-3 py-1 text-white disabled:bg-slate-600 bg-gray-700 hover:bg-gray-800 rounded-lg text-sm relative z-10">
             Озвучить</button>
         </div>
@@ -342,7 +342,8 @@ const mergedResults = computed(() =>
 
     <div class="w-full">
       <button @click="findPhrase"
-              class="px-3 py-1 w-full text-white disabled:bg-slate-600 bg-gray-700 hover:bg-gray-800 rounded-lg text-sm relative z-10">
+              :disabled="!userText.trim() || !selectedVideo?.videoId"
+              class="px-3 py-1 w-full text-white disabled:bg-slate-600 bg-gray-700 hover:bg-gray-800 rounded-lg text-sm relative z-10 disabled:bg-slate-600">
         Найти фрагмент</button>
             <textarea
               v-model="userText"
