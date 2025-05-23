@@ -1,8 +1,11 @@
 package git.klodhem.backend.model;
 
+import git.klodhem.backend.util.RoleUser;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -37,7 +40,8 @@ public class User {
     private String password;
 
     @Column(name = "role")
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private RoleUser role;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE)
     private List<Video> videos;

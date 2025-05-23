@@ -5,6 +5,7 @@ import git.klodhem.backend.exception.UserNotFoundException;
 import git.klodhem.backend.model.User;
 import git.klodhem.backend.repositories.UsersRepository;
 import git.klodhem.backend.services.UserService;
+import git.klodhem.backend.util.RoleUser;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.common.aliasing.qual.Unique;
 import org.modelmapper.ModelMapper;
@@ -27,7 +28,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void register(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole("ROLE_USER");
+        user.setRole(RoleUser.ROLE_USER);
         usersRepository.save(user);
     }
 

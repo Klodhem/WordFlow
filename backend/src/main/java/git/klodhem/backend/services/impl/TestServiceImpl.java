@@ -89,10 +89,21 @@ public class TestServiceImpl implements TestService {
                                 Function.identity()
                         ));
                 for (Answer answer: originalQuestion.getAnswers()){
-                    if (answer.isCorrect()&&answerMap.get(answer.getAnswerId()).isCorrect())
+                    if (answer.isCorrect() && answerMap.get(answer.getAnswerId()).isCorrect())
                         mark++;
+                    else if (answer.isCorrect() && !answerMap.get(answer.getAnswerId()).isCorrect() ||
+                            !answer.isCorrect() && answerMap.get(answer.getAnswerId()).isCorrect()) {
+                        mark--;
+                    }
                 }
-                userAnswerSheet.setMark((byte) (mark/originalQuestion.getCountCorrectAnswers()*100));
+                List<Answer> solutionAnswersList = solutionQuestionHashMap.get(originalQuestion.getQuestionId()).getAnswers();
+                long solutionCorrectAnswers = solutionAnswersList.stream().filter(Answer::isCorrect).count();
+                if (mark < 0 || solutionCorrectAnswers == solutionAnswersList.size()
+                        && (solutionCorrectAnswers != originalQuestion.getCountCorrectAnswers()
+                        || solutionCorrectAnswers != originalQuestion.getCountCorrectAnswers()-1)) {
+                    userAnswerSheet.setMark((byte) 0);
+                }
+                else userAnswerSheet.setMark((byte) (mark/originalQuestion.getCountCorrectAnswers()*100));
             }
             else userAnswerSheet.setMark((byte) 0);
             userAnswerSheet.setQuestion(originalQuestion);
