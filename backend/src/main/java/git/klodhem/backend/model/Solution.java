@@ -37,6 +37,10 @@ public class Solution {
     @JoinColumn(name = "video_id", referencedColumnName = "video_id")
     private Video video;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", referencedColumnName = "user_id")
+    private User student;
+
     @OneToMany(mappedBy = "solution", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAnswerSheet> userAnswerSheetList;
 }
