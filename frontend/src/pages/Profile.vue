@@ -1,10 +1,11 @@
 <script setup>
-import {onMounted, ref} from "vue";
-import { useRouter } from 'vue-router'
+import {onMounted, ref, watch} from "vue";
+import {useRoute, useRouter} from 'vue-router'
 import apiClient from '@/axios.js';
 
 const user = ref({});
 const router = useRouter()
+const route = useRoute();
 
 const logout = () => {
   localStorage.removeItem('authToken')
@@ -22,6 +23,10 @@ const getUser = async () => {
 onMounted(() => {
   getUser()
 })
+
+watch(() => route.fullPath, () => {
+  getUser();
+});
 </script>
 
 <template>

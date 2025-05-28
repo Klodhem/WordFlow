@@ -9,6 +9,7 @@ const username = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
+const typeUser = ref(1);
 
 const errors = reactive({
   username: '',
@@ -30,12 +31,22 @@ const registrationForm = async () => {
       alert('Пароли не совпадают!');
       return;
     }
+    let response;
 
-    const response = await axios.post('http://localhost:8080/auth/registration', {
-      username: username.value,
-      email: email.value,
-      password: password.value
-    })
+    if (typeUser.value === 1) {
+      response = await axios.post('http://localhost:8080/auth/registration', {
+        username: username.value,
+        email: email.value,
+        password: password.value
+      });
+    } else if (typeUser.value === 2) {
+      response = await axios.post('http://localhost:8080/auth/registrationTeacher', {
+        username: username.value,
+        email: email.value,
+        password: password.value
+      });
+    }
+
     const token = response.data['jwt-token'];
     if (!token) {
       console.error('Токен отсутствует в ответе сервера');
@@ -62,6 +73,13 @@ const registrationForm = async () => {
           <h1 class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl ">
             Регистрация
           </h1>
+          <div>
+            <label for="username" class="block mb-2 text-sm font-medium text-gray-900 ">Кто вы?</label>
+            <select v-model="typeUser" class="w-full bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-gray-950 focus:border-gray-950 block p-2.5">
+              <option :value="1">Студент</option>
+              <option :value="2">Преподаватель</option>
+            </select>
+          </div>
           <form novalidate class="space-y-4 md:space-y-6" @submit.prevent="registrationForm">
             <div>
               <label for="username" class="block mb-2 text-sm font-medium text-gray-900 ">Имя пользователя</label>
@@ -101,7 +119,7 @@ const registrationForm = async () => {
             </div>
             <button type="submit" class="w-full text-gray-50 border-gray-700 bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Зарегистрироваться</button>
             <p class="text-sm font-light text-gray-500">
-              У вас уже есть аккаунт? <a href="/Login" class="font-medium text-primary-600 hover:underline">Войти</a>
+              У вас уже есть аккаунт? <a href="/login" class="font-medium text-primary-600 hover:underline">Войти</a>
             </p>
           </form>
         </div>

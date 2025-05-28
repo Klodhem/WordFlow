@@ -18,15 +18,17 @@ public interface VideoService {
 
     List<VideoDTO> getVideosDTO();
 
-    File getVideoFile(long videoId);
+    File getVideoFile(long videoId, Long groupId);
 
     Long searchPhrase(long videoId, String phrase);
 
-    File getVttFile(long videoId, String type);
+    File getVttFile(long videoId, Long groupId, String type);
 
-    List<TranslateProposalDTO> getDictionary(long videoId);
+    List<TranslateProposalDTO> getDictionary(long videoId, Long groupId);
 
     String getTextVideo(long id);
 
     Video getVideoById(long id);
+
+    List<VideoDTO> getVideosGroupDTO(long groupId);
 }

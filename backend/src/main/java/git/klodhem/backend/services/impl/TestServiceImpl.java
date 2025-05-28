@@ -5,10 +5,13 @@ import git.klodhem.backend.dto.SolutionDTO;
 import git.klodhem.backend.dto.UserAnswerSheetDTO;
 import git.klodhem.backend.exception.AccessException;
 import git.klodhem.backend.model.Answer;
+import git.klodhem.backend.model.Group;
 import git.klodhem.backend.model.Question;
 import git.klodhem.backend.model.Solution;
+import git.klodhem.backend.model.Student;
 import git.klodhem.backend.model.UserAnswerSheet;
 import git.klodhem.backend.model.Video;
+import git.klodhem.backend.repositories.GroupsRepository;
 import git.klodhem.backend.repositories.QuestionsRepository;
 import git.klodhem.backend.repositories.SolutionRepository;
 import git.klodhem.backend.services.TestService;
@@ -23,8 +26,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static git.klodhem.backend.util.SecurityUtil.getCurrentUser;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +39,8 @@ public class TestServiceImpl implements TestService {
     private final YandexGPTServiceImpl yandexGPTService;
 
     private final SolutionRepository solutionRepository;
+
+    private final GroupsRepository groupsRepository;
 
     private final VideoServiceImpl videoService;
 
@@ -56,14 +64,27 @@ public class TestServiceImpl implements TestService {
         return QuestionsToQuestionsDTO(questions);
     }
 
-    public SolutionDTO solutionTest(List<QuestionDTO> questionSolutionDTOS, long id){
-        if (!videoService.checkAccessFromVideoById(id)){
-            throw new AccessException("Нет прав к данному видео");
+    @Override
+    public SolutionDTO solutionTest(List<QuestionDTO> questionSolutionDTOS, long videoId, Long groupId){
+        if (groupId == null){
+            if (!videoService.checkAccessFromVideoById(videoId)){
+                throw new AccessException("Нет прав к данному видео или видео не существует");
+            }
+        }
+        else {
+            Optional<Video> optionalVideo = groupsRepository.findVideoInGroupForStudent(groupId, videoId, getCurrentUser().getUserId());
+            if (optionalVideo.isEmpty()){
+                throw new AccessException("Нет прав к данному видео или видео не существует");
+            }
         }
 
+
         List<Question> solutionQuestions = QuestionsDTOToQuestions(questionSolutionDTOS);
-        List<Question> originalQuestions = questionsRepository.findByVideo_VideoId(id);
-        Solution solution = makingGrade(id, solutionQuestions, originalQuestions);
+        List<Question> originalQuestions = questionsRepository.findByVideo_VideoId(videoId);
+        Solution solution = makingGrade(videoId, solutionQuestions, originalQuestions);
+        Student student = new Student();
+        student.setUserId(getCurrentUser().getUserId());
+        solution.setStudent(student);
         solutionRepository.save(solution);
 
         return SolutionToSolutionDTO(solution);
@@ -127,7 +148,30 @@ public class TestServiceImpl implements TestService {
         return solution;
     }
 
-    public List<SolutionDTO> getHistorySolution(long videoId){
+    @Override
+    public List<SolutionDTO> getHistorySolution(long videoId, Long groupId, Long studentId){
+        if (groupId == null){
+            if (!videoService.checkAccessFromVideoById(videoId))
+                return null;
+
+            List<Solution> solutions = solutionRepository.findByVideo_VideoId(videoId);
+            return convertSolutionsToDTOs(solutions);
+        }
+        else {
+            Optional<Video> optionalVideo = groupsRepository.findVideoInGroupForStudent(groupId, videoId, studentId);
+            if (optionalVideo.isEmpty()){
+                return null;
+            }
+            List<Solution> solutions = solutionRepository.findByVideo_VideoIdAndStudent_UserId(videoId, studentId);
+            return convertSolutionsToDTOs(solutions);
+        }
+    }
+
+    @Override
+    public List<SolutionDTO> getHistoryStudentSolution(long videoId, long groupId, long studentId) {
+        Optional<Group> optionalVideo = groupsRepository.findByOwner_UserId(getCurrentUser().getUserId());
+        if(optionalVideo.isEmpty())
+            return null;
         if (!videoService.checkAccessFromVideoById(videoId))
             return null;
 

@@ -46,8 +46,6 @@ import apiClient from '@/axios.js';
 
 
 onMounted(async () => {
-
-
   try {
     const [lang, langTranslate] = await Promise.all([
       fetch('/data/language.json').then(r => r.json()),

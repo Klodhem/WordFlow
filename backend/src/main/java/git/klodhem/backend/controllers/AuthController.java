@@ -4,8 +4,11 @@ import git.klodhem.backend.dto.AuthenticationDTO;
 import git.klodhem.backend.dto.UserLoginDTO;
 import git.klodhem.backend.exception.UserLoginException;
 import git.klodhem.backend.exception.UserRegistrationException;
+import git.klodhem.backend.model.Student;
+import git.klodhem.backend.model.Teacher;
 import git.klodhem.backend.model.User;
 import git.klodhem.backend.security.JWTUtil;
+import git.klodhem.backend.security.UserDetailsImpl;
 import git.klodhem.backend.services.UserService;
 import git.klodhem.backend.util.UserValidator;
 import jakarta.validation.Valid;
@@ -14,6 +17,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,16 +43,32 @@ public class AuthController {
     @PostMapping("/registration")
     public Map<String,String> performRegistration(@RequestBody @Valid UserLoginDTO userLoginDTO,
                                                   BindingResult bindingResult){
-        User user = convertToUser(userLoginDTO);
-        userValidator.validate(user, bindingResult);
+        Student student = convertToStudent(userLoginDTO);
+        userValidator.validate(student, bindingResult);
 //        String field = bindingResult.getFieldError().getField();
         if (bindingResult.hasErrors()) {
             throw new UserRegistrationException("Ошибка при регистрации пользователя");
         }
 
-        userService.register(user);
+        userService.registerStudent(student);
 
-        String token = jwtUtil.generateToken(user.getUsername());
+        String token = jwtUtil.generateToken(student);
+        return Map.of("jwt-token", token);
+    }
+
+    @PostMapping("/registrationTeacher")
+    public Map<String,String> performRegistrationTeacher(@RequestBody @Valid UserLoginDTO userLoginDTO,
+                                                  BindingResult bindingResult){
+        Teacher teacher = convertToTeacher(userLoginDTO);
+        userValidator.validate(teacher, bindingResult);
+//        String field = bindingResult.getFieldError().getField();
+        if (bindingResult.hasErrors()) {
+            throw new UserRegistrationException("Ошибка при регистрации пользователя");
+        }
+
+        userService.registerTeacher(teacher);
+
+        String token = jwtUtil.generateToken(teacher);
         return Map.of("jwt-token", token);
     }
 
@@ -58,17 +78,23 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(authenticationDTO.getUsername(),
                         authenticationDTO.getPassword());
 
+        Authentication auth;
         try {
-            authenticationManager.authenticate(authenticationToken);
+            auth = authenticationManager.authenticate(authenticationToken);
         }catch (BadCredentialsException e){
             throw new UserLoginException("Ошибка при авторизации пользователя");
         }
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        User user = userDetails.getUser();
 
-        String token = jwtUtil.generateToken(authenticationDTO.getUsername());
+        String token = jwtUtil.generateToken(user);
         return Map.of("jwt-token", token);
     }
 
-    private User convertToUser(UserLoginDTO userLoginDTO){
-        return modelMapper.map(userLoginDTO, User.class);
+    private Teacher convertToTeacher(UserLoginDTO userLoginDTO){
+        return modelMapper.map(userLoginDTO, Teacher.class);
+    }
+    private Student convertToStudent(UserLoginDTO userLoginDTO){
+        return modelMapper.map(userLoginDTO, Student.class);
     }
 }

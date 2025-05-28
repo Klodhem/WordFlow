@@ -2,6 +2,8 @@ package git.klodhem.backend.services.impl;
 
 import git.klodhem.backend.dto.UserInfoDTO;
 import git.klodhem.backend.exception.UserNotFoundException;
+import git.klodhem.backend.model.Student;
+import git.klodhem.backend.model.Teacher;
 import git.klodhem.backend.model.User;
 import git.klodhem.backend.repositories.UsersRepository;
 import git.klodhem.backend.services.UserService;
@@ -26,10 +28,15 @@ public class UserServiceImpl implements UserService {
     private final ModelMapper modelMapper;
 
     @Override
-    public void register(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole(RoleUser.ROLE_USER);
-        usersRepository.save(user);
+    public void registerStudent(Student student) {
+        student.setPassword(passwordEncoder.encode(student.getPassword()));
+        usersRepository.save(student);
+    }
+
+    @Override
+    public void registerTeacher(Teacher teacher) {
+        teacher.setPassword(passwordEncoder.encode(teacher.getPassword()));
+        usersRepository.save(teacher);
     }
 
     @Override

@@ -35,12 +35,22 @@ public class TestController {
 
     @PostMapping("/solution")
     public SolutionDTO checkTest(@RequestBody List<QuestionDTO> questionDTOS,
-                                 @RequestParam("videoId") long videoId){
-        return testService.solutionTest(questionDTOS, videoId);
+                                 @RequestParam("videoId") long videoId,
+                                 @RequestParam(value = "groupId", required = false) Long groupId){
+        return testService.solutionTest(questionDTOS, videoId, groupId);
     }
 
     @GetMapping("/history")
-    public List<SolutionDTO> getTestHistory(@RequestParam("videoId") long videoId){
-        return testService.getHistorySolution(videoId);
+    public List<SolutionDTO> getTestHistory(@RequestParam("videoId") long videoId,
+                                            @RequestParam(value = "groupId", required = false) Long groupId,
+                                            @RequestParam(value = "studentId", required = false) Long studentId){
+        return testService.getHistorySolution(videoId, groupId, studentId);
+    }
+
+    @GetMapping("/historyStudent")
+    public List<SolutionDTO> historyStudent(@RequestParam("videoId") long videoId,
+                                            @RequestParam("groupId") long groupId,
+                                            @RequestParam("studentId") long studentId){
+        return testService.getHistoryStudentSolution(videoId, groupId, studentId);
     }
 }

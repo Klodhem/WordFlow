@@ -32,9 +32,11 @@ const loginForm = async () => {
 
     const payload = JSON.parse(atob(token.split('.')[1]));
     const expirationTime = payload.exp * 1000;
+    const typeUser = payload.role;
 
     localStorage.setItem('authToken', token);
     localStorage.setItem('tokenExpiration', expirationTime);
+    localStorage.setItem('typeUser', typeUser);
     await router.push({name: 'Home'})
   } catch (err) {
     console.error(err)
@@ -72,7 +74,7 @@ const loginForm = async () => {
             </div>
             <button type="submit" class="w-full text-gray-50 border-gray-700 bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Войти</button>
             <p class="text-sm font-light text-gray-500">
-              Вы не зарегистрированы? <a href="/Registration" class="font-medium text-primary-600 hover:underline">Регистрация</a>
+              Вы не зарегистрированы? <a href="/registration" class="font-medium text-primary-600 hover:underline">Регистрация</a>
             </p>
           </form>
         </div>

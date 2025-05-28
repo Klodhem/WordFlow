@@ -75,7 +75,20 @@ public class VideoController {
 
     @GetMapping("/originalSubtitle/{videoId}")
     public ResponseEntity<Resource> originalSubtitle(@PathVariable long videoId){
-        File file = videoService.getVttFile(videoId, "original");
+        File file = videoService.getVttFile(videoId, null,"original");
+        if (!file.exists()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        Resource resource = new FileSystemResource(file);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; fileId=\"" + videoId + "\"")
+                .body(resource);
+    }
+
+    @GetMapping("/group/originalSubtitle/{groupId}/{videoId}")
+    public ResponseEntity<Resource> originalSubtitleGroup(@PathVariable long videoId, @PathVariable long groupId){
+        File file = videoService.getVttFile(videoId, groupId, "original");
         if (!file.exists()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
@@ -88,7 +101,20 @@ public class VideoController {
 
     @GetMapping("/translateSubtitle/{videoId}")
     public ResponseEntity<Resource> translateSubtitle(@PathVariable long videoId){
-        File file = videoService.getVttFile(videoId, "translate");
+        File file = videoService.getVttFile(videoId, null, "translate");
+        if (!file.exists()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        Resource resource = new FileSystemResource(file);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; fileId=\"" + videoId + "\"")
+                .body(resource);
+    }
+
+    @GetMapping("/group/translateSubtitle/{groupId}/{videoId}")
+    public ResponseEntity<Resource> translateSubtitleGroup(@PathVariable long videoId, @PathVariable long groupId){
+        File file = videoService.getVttFile(videoId, groupId, "translate");
         if (!file.exists()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
@@ -100,14 +126,15 @@ public class VideoController {
     }
 
     @GetMapping("/dictionary/{videoId}")
-    public List<TranslateProposalDTO> dictionary(@PathVariable long videoId){
-        return videoService.getDictionary(videoId);
+    public List<TranslateProposalDTO> dictionary(@PathVariable long videoId,
+                                                 @RequestParam(required = false) Long groupId){
+        return videoService.getDictionary(videoId, groupId);
     }
 
 
     @GetMapping("/watch/{videoId}")
     public ResponseEntity<ResourceRegion> streamVideo(@PathVariable long videoId, @RequestHeader HttpHeaders headers) {
-        File videoFile = videoService.getVideoFile(videoId);
+        File videoFile = videoService.getVideoFile(videoId, null);
         long contentLength = videoFile.length();
 
         Resource videoResource = new FileSystemResource(videoFile);
@@ -135,4 +162,38 @@ public class VideoController {
             .body(region);
     }
 
+    @GetMapping("/videosGroup")
+    public List<VideoDTO> videosGroup(@RequestParam("groupId") long groupId) {
+        return videoService.getVideosGroupDTO(groupId);
+    }
+
+    @GetMapping("/group/watch/{groupId}/{videoId}")
+    public ResponseEntity<ResourceRegion> streamVideoGroup(@PathVariable long videoId, @PathVariable long groupId, @RequestHeader HttpHeaders headers) {
+        File videoFile = videoService.getVideoFile(videoId, groupId);
+        long contentLength = videoFile.length();
+
+        Resource videoResource = new FileSystemResource(videoFile);
+        HttpRange range = headers.getRange().stream().findFirst().orElse(null);
+
+        ResourceRegion region;
+        if (range != null) {
+            long start = range.getRangeStart(contentLength);
+            long end = range.getRangeEnd(contentLength);
+
+            if (end >= contentLength) {
+                end = start + CHUNK_SIZE - 1;
+            }
+
+            long requestedSize = end - start + 1;
+            long rangeLength = Math.max(requestedSize, CHUNK_SIZE);
+            rangeLength = Math.min(rangeLength, contentLength - start);
+            region = new ResourceRegion(videoResource, start, rangeLength);
+        } else {
+            region = new ResourceRegion(videoResource, 0, contentLength);
+        }
+
+        return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+                .contentType(MediaTypeFactory.getMediaType(videoResource).orElse(MediaType.APPLICATION_OCTET_STREAM))
+                .body(region);
+    }
 }

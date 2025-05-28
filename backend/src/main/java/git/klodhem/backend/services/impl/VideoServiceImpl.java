@@ -7,9 +7,12 @@ import git.klodhem.backend.dto.SubtitleDTO;
 import git.klodhem.backend.dto.VideoDTO;
 import git.klodhem.backend.exception.VideoFileException;
 import git.klodhem.backend.model.Answer;
+import git.klodhem.backend.model.Group;
 import git.klodhem.backend.model.Question;
+import git.klodhem.backend.model.Student;
 import git.klodhem.backend.model.User;
 import git.klodhem.backend.model.Video;
+import git.klodhem.backend.repositories.GroupsRepository;
 import git.klodhem.backend.repositories.VideosRepository;
 import git.klodhem.backend.services.VideoService;
 import git.klodhem.backend.util.ProposalMapper;
@@ -35,6 +38,8 @@ import static git.klodhem.backend.util.SecurityUtil.getCurrentUser;
 public class VideoServiceImpl implements VideoService {
     private final VideosRepository videosRepository;
 
+    private final GroupsRepository groupsRepository;
+
     private final ModelMapper modelMapper;
 
     private final ObjectMapper objectMapper;
@@ -47,7 +52,7 @@ public class VideoServiceImpl implements VideoService {
         video.setTitle(title);
         video.setVideoPath(path);
         video.setStatus(StatusVideo.PROCESSING);
-        User user = new User();
+        User user = new Student();
         user.setUserId(getCurrentUser().getUserId());
         video.setOwner(user);
         return videosRepository.save(video).getVideoId();
@@ -80,13 +85,24 @@ public class VideoServiceImpl implements VideoService {
                 .toList();
     }
 
-
-    public File getVideoFile(long videoId) {
-        Optional<Video> optionalVideo = videosRepository.findByOwnerUserIdAndVideoId(getCurrentUser().getUserId(), videoId);
-        if (optionalVideo.isEmpty()) {
-            log.warn("Запись о видео не найдена в БД");
-            throw new VideoFileException("Запись о видео не найдена в БД");
+    @Override
+    public File getVideoFile(long videoId, Long groupId) {
+        Optional<Video> optionalVideo;
+        if(groupId == null) {
+            optionalVideo = videosRepository.findByOwnerUserIdAndVideoId(getCurrentUser().getUserId(), videoId);
+            if (optionalVideo.isEmpty()) {
+                log.warn("Запись о видео не найдена в БД");
+                throw new VideoFileException("Запись о видео не найдена в БД");
+            }
         }
+        else {
+            optionalVideo = groupsRepository.findVideoInGroupForStudent(groupId, videoId, getCurrentUser().getUserId());
+            if (optionalVideo.isEmpty()){
+                log.warn("Запись о видео не найдена в БД");
+                throw new VideoFileException("Запись о видео не найдена в БД");
+            }
+        }
+
         File videoFile = new File(optionalVideo.get().getVideoPath());
 
         if (!videoFile.exists()) {
@@ -137,11 +153,20 @@ public class VideoServiceImpl implements VideoService {
 
 
     @Override
-    public File getVttFile(long videoId, String type) {
-        Optional<Video> optionalVideo = videosRepository.findByOwnerUserIdAndVideoId(getCurrentUser().getUserId(), videoId);
-        if (optionalVideo.isEmpty()) {
-            log.warn("Запись о видео не найдена в БД");
-            throw new VideoFileException("Запись о видео не найдена в БД");
+    public File getVttFile(long videoId, Long groupId, String type) {
+        Optional<Video> optionalVideo;
+        if (groupId == null) {
+            optionalVideo = videosRepository.findByOwnerUserIdAndVideoId(getCurrentUser().getUserId(), videoId);
+            if (optionalVideo.isEmpty()) {
+                log.warn("Запись о видео не найдена в БД");
+                throw new VideoFileException("Запись о видео не найдена в БД");
+            }
+        } else {
+            optionalVideo = groupsRepository.findVideoInGroupForStudent(groupId, videoId, getCurrentUser().getUserId());
+            if (optionalVideo.isEmpty()) {
+                log.warn("Запись о видео не найдена в БД");
+                throw new VideoFileException("Запись о видео не найдена в БД");
+            }
         }
         if (optionalVideo.get().getSubtitlesOriginalPath() == null || optionalVideo.get().getSubtitlesTranslatePath() == null) {
             log.warn("Субтитры к видео не найдены");
@@ -163,12 +188,22 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public List<TranslateProposalDTO> getDictionary(long id) {
-        Optional<Video> optionalVideo = videosRepository.findByOwnerUserIdAndVideoId(getCurrentUser().getUserId(), id);
-        if (optionalVideo.isEmpty()) {
-            log.warn("Запись о видео не найдена в БД");
-            throw new VideoFileException("Запись о видео не найдена в БД");
+    public List<TranslateProposalDTO> getDictionary(long videoId, Long groupId) {
+        Optional<Video> optionalVideo;
+        if (groupId == null) {
+            optionalVideo = videosRepository.findByOwnerUserIdAndVideoId(getCurrentUser().getUserId(), videoId);
+            if (optionalVideo.isEmpty()) {
+                log.warn("Запись о видео не найдена в БД");
+                throw new VideoFileException("Запись о видео не найдена в БД");
+            }
+        } else {
+            optionalVideo = groupsRepository.findVideoInGroupForStudent(groupId, videoId, getCurrentUser().getUserId());
+            if (optionalVideo.isEmpty()) {
+                log.warn("Запись о видео не найдена в БД");
+                throw new VideoFileException("Запись о видео не найдена в БД");
+            }
         }
+
         JsonNode proposals = optionalVideo.get().getProposals();
         return proposalMapper.mapTranslateProposals(proposals);
     }
@@ -209,6 +244,18 @@ public class VideoServiceImpl implements VideoService {
         }
 
         videosRepository.save(video);
+    }
+
+    @Override
+    public List<VideoDTO> getVideosGroupDTO(long groupId) {
+        Optional<Group> optionalGroup = groupsRepository.findByGroupIdAndStudents_UserId(groupId, getCurrentUser().getUserId());
+        if (optionalGroup.isEmpty()) {
+            return List.of();
+        }
+
+        return optionalGroup.get().getVideos().stream()
+                .map(this::convertToVideoDTO)
+                .toList();
     }
 
     public Video getVideoById(long id) {

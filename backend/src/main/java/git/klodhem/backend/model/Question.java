@@ -48,6 +48,6 @@ public class Question {
     @JoinColumn(name = "video_id", referencedColumnName = "video_id")
     private Video video;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "question")
     private List<UserAnswerSheet> userAnswerSheets;
 }
