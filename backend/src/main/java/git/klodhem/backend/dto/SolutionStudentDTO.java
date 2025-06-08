@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class SolutionDTO {
+public class SolutionStudentDTO {
     private long solutionId;
 
     private byte mark;
@@ -17,5 +17,5 @@ public class SolutionDTO {
     private LocalDateTime dateTime;
 
     @JsonManagedReference
-    private List<UserAnswerSheetDTO> userAnswerSheetList;
+    private List<UserAnswerSheetStudentDTO> userAnswerSheetList;
 }

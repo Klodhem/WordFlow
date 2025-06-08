@@ -11,19 +11,18 @@ const intervalId = ref(null);
 const selectGroup = async group => {
   await router.push({
     name: 'DisplayingGroup',
-    params: { groupId: group.groupId }
+    params: {groupId: group.groupId}
   })
 }
 
 const getGroups = async () => {
   const typeUser = localStorage.getItem('typeUser')
   try {
-    if (typeUser==="ROLE_STUDENT"){
-      const response = await apiClient.get('/group/getGroups')
+    if (typeUser === "ROLE_STUDENT") {
+      const response = await apiClient.get('/groups')
       groups.value = response.data
-    }
-    else if (typeUser==="ROLE_TEACHER"){
-      const response = await apiClient.get('/group/getManagedGroups')
+    } else if (typeUser === "ROLE_TEACHER") {
+      const response = await apiClient.get('/groups/managed')
       groups.value = response.data
     }
   } catch (err) {

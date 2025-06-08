@@ -3,7 +3,7 @@
 import store from "@/store/store.js";
 import apiClient from "@/axios.js";
 import {ref} from "vue";
-import { vAutoAnimate } from '@formkit/auto-animate'
+import {vAutoAnimate} from '@formkit/auto-animate'
 
 const selectedLanguage = ref(null);
 const speechRate = ref(1.0);
@@ -20,7 +20,7 @@ async function playSynthesizedSpeech(text) {
       },
       responseType: 'blob'
     })
-    const audioBlob = new Blob([response.data], { type: 'audio/wav' })
+    const audioBlob = new Blob([response.data], {type: 'audio/wav'})
     const audioUrl = URL.createObjectURL(audioBlob)
     const audio = new Audio(audioUrl)
     await audio.play()

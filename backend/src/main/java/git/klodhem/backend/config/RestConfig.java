@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-public class SpringConfig {
+public class RestConfig {
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();

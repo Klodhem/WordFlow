@@ -44,11 +44,10 @@ public class AWSServiceImpl implements AWSService {
             byte[] fileContent = Files.readAllBytes(filePath);
             s3Client.putObject(putObjectRequest, RequestBody.fromBytes(fileContent));
             log.debug("Файл успешно загружен: {}", fileName);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             log.error("Ошибка при отправке файла на Storage: {}", fileName, e);
             throw new RuntimeException("Ошибка загрузки: " + fileName, e);
         }
-        System.out.println("Файл успешно загружен!");
+        log.info("Файл успешно загружен!");
     }
 }

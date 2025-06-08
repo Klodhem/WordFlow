@@ -66,7 +66,12 @@ modelUri: "gpt://${FOLDER_ID}/yandexgpt/rc"
 urlTranslateText: "https://translate.api.cloud.yandex.net/translate/v2/translate"
 urlSynthesisSpeech: "https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize"
 urlRecognitionSpeech: "https://storage.yandexcloud.net/video.translate/"
+urlOperationDone: "https://operation.api.cloud.yandex.net/operations/"
+urlRecognitionResult: "https://stt.api.cloud.yandex.net/stt/v3/getRecognition?operationId="
 
 bucketMinio: ${BUCKET_MINIO}
 minioUser: ${MINIO_USER}
 minioPassword: ${MINIO_PASSWORD}
+jwt:
+  expiration:
+    minutes: 60

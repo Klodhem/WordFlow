@@ -1,7 +1,7 @@
 package git.klodhem.backend.controllers;
 
 import git.klodhem.backend.dto.TranslateProposalDTO;
-import git.klodhem.backend.dto.VideoDTO;
+import git.klodhem.backend.dto.model.VideoDTO;
 import git.klodhem.backend.services.VideoProcessingService;
 import git.klodhem.backend.services.VideoService;
 import git.klodhem.backend.util.Language;
@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,7 +31,7 @@ import java.io.File;
 import java.util.List;
 
 @RestController
-@RequestMapping("/video")
+@RequestMapping("/videos")
 @RequiredArgsConstructor
 @Log4j2
 public class VideoController {
@@ -40,31 +41,22 @@ public class VideoController {
 
     private static final long CHUNK_SIZE = 2 * 1024 * 1024;
 
-    @PostMapping("/upload")
+    @PostMapping()
     public boolean upload(@RequestParam("file") MultipartFile file, @RequestParam Language language,
-                                  @RequestParam(required = false) LanguageTranslate languageTranslate,
-                          @RequestParam(required = false) boolean generateTest) {
-        String fileName = file.getOriginalFilename();
-        //todo
-//        if (videoService.getVideoFile(fileName)!=null)
-//            return false;
-        return videoProcessingService.videoProcessing(file, fileName, language, languageTranslate, generateTest);
+                          @RequestParam() LanguageTranslate languageTranslate,
+                          @RequestParam(required = false) boolean generateTest,
+                          @RequestParam() String videoName) {
+        return videoProcessingService.videoProcessing(file, videoName, language, languageTranslate, generateTest);
     }
 
-    @GetMapping("/getVideos")
+    @GetMapping()
     public List<VideoDTO> getVideos() {
-        return videoService.getVideosDTO();
+        return videoService.getVideos();
     }
 
-//    @GetMapping("/select")
-//    public ResponseEntity<String> select(@RequestParam(name = "videoId") Long videoId) {
-//        String path = videoService.getPath(videoId);
-//        return ResponseEntity.ok(path);
-//    }
-
-    @GetMapping("/searchPhrase")
-    public ResponseEntity<Object> searchPhrase(@RequestParam(name = "videoId") Long videoId,
-                             @RequestParam(name = "phrase") String phrase) {
+    @GetMapping("/{videoId}/phrase")
+    public ResponseEntity<Object> searchPhrase(@PathVariable(name = "videoId") Long videoId,
+                                               @RequestParam(name = "phrase") String phrase) {
         Long time = videoService.searchPhrase(videoId, phrase);
         if (time == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -73,9 +65,9 @@ public class VideoController {
         return ResponseEntity.ok(time);
     }
 
-    @GetMapping("/originalSubtitle/{videoId}")
-    public ResponseEntity<Resource> originalSubtitle(@PathVariable long videoId){
-        File file = videoService.getVttFile(videoId, null,"original");
+    @GetMapping("/{videoId}/originalSubtitle")
+    public ResponseEntity<Resource> originalSubtitle(@PathVariable long videoId) {
+        File file = videoService.getVttFile(videoId, null, "original");
         if (!file.exists()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
@@ -86,8 +78,8 @@ public class VideoController {
                 .body(resource);
     }
 
-    @GetMapping("/group/originalSubtitle/{groupId}/{videoId}")
-    public ResponseEntity<Resource> originalSubtitleGroup(@PathVariable long videoId, @PathVariable long groupId){
+    @GetMapping("/group/{groupId}/{videoId}/originalSubtitle")
+    public ResponseEntity<Resource> originalSubtitleGroup(@PathVariable long videoId, @PathVariable long groupId) {
         File file = videoService.getVttFile(videoId, groupId, "original");
         if (!file.exists()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -99,8 +91,8 @@ public class VideoController {
                 .body(resource);
     }
 
-    @GetMapping("/translateSubtitle/{videoId}")
-    public ResponseEntity<Resource> translateSubtitle(@PathVariable long videoId){
+    @GetMapping("/{videoId}/translateSubtitle")
+    public ResponseEntity<Resource> translateSubtitle(@PathVariable long videoId) {
         File file = videoService.getVttFile(videoId, null, "translate");
         if (!file.exists()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -112,8 +104,8 @@ public class VideoController {
                 .body(resource);
     }
 
-    @GetMapping("/group/translateSubtitle/{groupId}/{videoId}")
-    public ResponseEntity<Resource> translateSubtitleGroup(@PathVariable long videoId, @PathVariable long groupId){
+    @GetMapping("/group/{groupId}/{videoId}/translateSubtitle")
+    public ResponseEntity<Resource> translateSubtitleGroup(@PathVariable long videoId, @PathVariable long groupId) {
         File file = videoService.getVttFile(videoId, groupId, "translate");
         if (!file.exists()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -125,14 +117,14 @@ public class VideoController {
                 .body(resource);
     }
 
-    @GetMapping("/dictionary/{videoId}")
+    @GetMapping("/{videoId}/dictionary")
     public List<TranslateProposalDTO> dictionary(@PathVariable long videoId,
-                                                 @RequestParam(required = false) Long groupId){
+                                                 @RequestParam(required = false) Long groupId) {
         return videoService.getDictionary(videoId, groupId);
     }
 
 
-    @GetMapping("/watch/{videoId}")
+    @GetMapping("/{videoId}/watch")
     public ResponseEntity<ResourceRegion> streamVideo(@PathVariable long videoId, @RequestHeader HttpHeaders headers) {
         File videoFile = videoService.getVideoFile(videoId, null);
         long contentLength = videoFile.length();
@@ -158,16 +150,16 @@ public class VideoController {
         }
 
         return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
-            .contentType(MediaTypeFactory.getMediaType(videoResource).orElse(MediaType.APPLICATION_OCTET_STREAM))
-            .body(region);
+                .contentType(MediaTypeFactory.getMediaType(videoResource).orElse(MediaType.APPLICATION_OCTET_STREAM))
+                .body(region);
     }
 
-    @GetMapping("/videosGroup")
-    public List<VideoDTO> videosGroup(@RequestParam("groupId") long groupId) {
+    @GetMapping("/group/{groupId}")
+    public List<VideoDTO> videosGroup(@PathVariable("groupId") long groupId) {
         return videoService.getVideosGroupDTO(groupId);
     }
 
-    @GetMapping("/group/watch/{groupId}/{videoId}")
+    @GetMapping("/group/{groupId}/{videoId}/watch")
     public ResponseEntity<ResourceRegion> streamVideoGroup(@PathVariable long videoId, @PathVariable long groupId, @RequestHeader HttpHeaders headers) {
         File videoFile = videoService.getVideoFile(videoId, groupId);
         long contentLength = videoFile.length();
@@ -195,5 +187,10 @@ public class VideoController {
         return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
                 .contentType(MediaTypeFactory.getMediaType(videoResource).orElse(MediaType.APPLICATION_OCTET_STREAM))
                 .body(region);
+    }
+
+    @DeleteMapping("/{videoId}")
+    public void deleteVideo(@PathVariable("videoId") long videoId) {
+        videoService.deleteVideo(videoId);
     }
 }

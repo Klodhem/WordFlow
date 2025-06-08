@@ -4,7 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import git.klodhem.backend.dto.SubtitleDTO;
-import git.klodhem.backend.dto.VideoDTO;
+import git.klodhem.backend.dto.TranslateProposalDTO;
+import git.klodhem.backend.dto.model.VideoDTO;
 import git.klodhem.backend.exception.VideoFileException;
 import git.klodhem.backend.model.Answer;
 import git.klodhem.backend.model.Group;
@@ -17,7 +18,6 @@ import git.klodhem.backend.repositories.VideosRepository;
 import git.klodhem.backend.services.VideoService;
 import git.klodhem.backend.util.ProposalMapper;
 import git.klodhem.backend.util.StatusVideo;
-import git.klodhem.backend.dto.TranslateProposalDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -25,6 +25,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -73,12 +77,7 @@ public class VideoServiceImpl implements VideoService {
         });
     }
 
-
-//    public String getPath(long videoId) {
-//        return videosRepository.findById(videoId).map(Video::getVideoPath).orElse(null);
-//    }
-
-    public List<VideoDTO> getVideosDTO() {
+    public List<VideoDTO> getVideos() {
         List<Video> allByOwnerUserId = videosRepository.findAllByOwnerUserId(getCurrentUser().getUserId());
         return allByOwnerUserId.stream()
                 .map(this::convertToVideoDTO)
@@ -88,16 +87,15 @@ public class VideoServiceImpl implements VideoService {
     @Override
     public File getVideoFile(long videoId, Long groupId) {
         Optional<Video> optionalVideo;
-        if(groupId == null) {
+        if (groupId == null) {
             optionalVideo = videosRepository.findByOwnerUserIdAndVideoId(getCurrentUser().getUserId(), videoId);
             if (optionalVideo.isEmpty()) {
                 log.warn("Запись о видео не найдена в БД");
                 throw new VideoFileException("Запись о видео не найдена в БД");
             }
-        }
-        else {
+        } else {
             optionalVideo = groupsRepository.findVideoInGroupForStudent(groupId, videoId, getCurrentUser().getUserId());
-            if (optionalVideo.isEmpty()){
+            if (optionalVideo.isEmpty()) {
                 log.warn("Запись о видео не найдена в БД");
                 throw new VideoFileException("Запись о видео не найдена в БД");
             }
@@ -115,12 +113,11 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     public Long searchPhrase(long videoId, String phrase) {
-        Video video;
         Optional<Video> optionalVideo = videosRepository.findById(videoId);
         if (optionalVideo.isEmpty()) {
             return null;
         } else {
-            video = optionalVideo.get();
+            Video video = optionalVideo.get();
             if (video.getOriginalText().replaceAll("[^\\p{L}0-9]", "").toUpperCase()
                     .contains(phrase.replaceAll("[^\\p{L}0-9]", "").toUpperCase()))
                 return getPhraseTime(video, "original", phrase);
@@ -256,6 +253,23 @@ public class VideoServiceImpl implements VideoService {
         return optionalGroup.get().getVideos().stream()
                 .map(this::convertToVideoDTO)
                 .toList();
+    }
+
+    @Override
+    public void deleteVideo(long videoId) {
+        Video video = getVideoById(videoId);
+        Path videoPath = Paths.get(video.getVideoPath());
+        Path subsOrigPath = Paths.get(video.getSubtitlesOriginalPath());
+        Path subsTransPath = Paths.get(video.getSubtitlesTranslatePath());
+        try {
+            Files.deleteIfExists(videoPath);
+            Files.deleteIfExists(subsOrigPath);
+            Files.deleteIfExists(subsTransPath);
+        } catch (IOException e) {
+            log.error("Не получилось удалить файлы для видео {}: {}", video.getTitle(), e.getMessage());
+            throw new VideoFileException(String.format("Ошибка при удалении файлов видео %s", video.getTitle()), e);
+        }
+        videosRepository.delete(video);
     }
 
     public Video getVideoById(long id) {

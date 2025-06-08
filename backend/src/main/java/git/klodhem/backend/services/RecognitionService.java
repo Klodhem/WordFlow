@@ -1,6 +1,6 @@
 package git.klodhem.backend.services;
 
-import git.klodhem.backend.dto.ResultSpeechRecognitionDTO;
+import git.klodhem.backend.dto.yandex.ResultSpeechRecognitionDTO;
 import git.klodhem.backend.util.Language;
 
 import java.util.ArrayList;

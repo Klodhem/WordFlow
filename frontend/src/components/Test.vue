@@ -1,10 +1,11 @@
 <script setup>
 
 import store from "@/store/store.js";
-import { vAutoAnimate } from '@formkit/auto-animate'
+import {vAutoAnimate} from '@formkit/auto-animate'
 import {computed, ref} from "vue";
 import apiClient from "@/axios.js";
 import {useRoute} from "vue-router";
+
 const route = useRoute()
 
 const groupId = Number(useRoute().params.groupId)
@@ -34,26 +35,40 @@ const submitTest = async () => {
   })
 
   try {
-    const resp = await apiClient.post('/test/solution', questions,
-      {
-        params: {
-          videoId: store.state.selectedVideo.videoId,
-          groupId: groupId
-        },
-        headers: {'Content-Type': 'application/json'}
-      }
-    )
+    let resp;
+    if (Number.isNaN(groupId)) {
+      resp = await apiClient.post(`/tests/${store.state.selectedVideo.videoId}/solution`, questions,
+        {
+          headers: {'Content-Type': 'application/json'}
+        })
+    } else {
+      resp = await apiClient.post(`/tests/${store.state.selectedVideo.videoId}/solution`, questions,
+        {
+          params: {
+            groupId: groupId
+          },
+          headers: {'Content-Type': 'application/json'}
+        })
+    }
+
     resultTest.value = resp.data;
     solutionSend.value = true;
   } catch (err) {
     console.error(err)
     alert('Не удалось отправить тест')
   }
-  const responseHistorySolution = await apiClient.get('/test/history',
-    {
-      params: {videoId: store.state.selectedVideo.videoId},
-    }
-  )
+  let responseHistorySolution;
+  if (Number.isNaN(groupId)) {
+    responseHistorySolution = await apiClient.get(`/tests/${store.state.selectedVideo.videoId}/history`)
+  } else {
+    responseHistorySolution = await apiClient.get(`/tests/${store.state.selectedVideo.videoId}/history`,
+      {
+        params: {
+          groupId: groupId,
+        },
+      }
+    )
+  }
   solutionsHistory.value = responseHistorySolution.data;
 
 };
@@ -99,10 +114,7 @@ function tryTestAgain() {
 
 const generateTest = async () => {
   try {
-    await apiClient.post('/test/generate',{},
-      {
-        params: {videoId: store.state.selectedVideo.videoId},
-      });
+    await apiClient.post(`/tests/${store.state.selectedVideo.videoId}`);
 
   } catch (err) {
     console.log('Ошибка запроса:', err.message)
@@ -137,7 +149,8 @@ const mergedResults = computed(() =>
         class="rounded-lg shadow-lg overflow-hidden bg-white">
         <div v-if="store.state.test.length !== 0&&!solutionSend" class="ml-4">
           <form id="testForm" :key="formKey" @submit.prevent="submitTest">
-            <fieldset v-for="(q, i) in store.state.test" :key="q.questionId" style="margin-bottom:1em;">
+            <fieldset v-for="(q, i) in store.state.test" :key="q.questionId"
+                      style="margin-bottom:1em;">
               <legend>{{ i + 1 }}. {{ q.text }}</legend>
 
               <div v-if="q.type === 'SINGLE'">
@@ -163,12 +176,16 @@ const mergedResults = computed(() =>
                 </label>
               </div>
             </fieldset>
-            <button type="submit" class="px-3 py-2 font-semibold text-white disabled:bg-slate-600 bg-gray-700 hover:bg-gray-800 rounded-lg text-sm relative z-10">Завершить тест</button>
+            <button type="submit"
+                    class="px-3 py-2 font-semibold text-white disabled:bg-slate-600 bg-gray-700 hover:bg-gray-800 rounded-lg text-sm relative z-10">
+              Завершить тест
+            </button>
           </form>
         </div>
         <div v-if="store.state.test.length !== 0&&solutionSend" class="gap-20">
           <div class="w-full p-4 border border-gray-200 rounded-lg shadow-sm bg-gray-700">
-            <h5 class="mb-2 text-xl font-semibold tracking-tight text-gray-900 dark:text-white">Общая оценка: {{resultTest.mark}}/100</h5>
+            <h5 class="mb-2 text-xl font-semibold tracking-tight text-gray-900 dark:text-white">
+              Общая оценка: {{ resultTest.mark }}/100</h5>
           </div>
           <table class="table-auto border border-collapse w-full mt-4">
             <thead>
@@ -184,8 +201,10 @@ const mergedResults = computed(() =>
             </tr>
             </tbody>
           </table>
-          <button type="button" @click="tryTestAgain" class="mt-4 mb-4 font-semibold px-3 py-3 text-white disabled:bg-slate-600 bg-gray-700 hover:bg-gray-800 rounded-lg text-sm relative z-10"
-          >Повторить попытку</button>
+          <button type="button" @click="tryTestAgain"
+                  class="mt-4 mb-4 font-semibold px-3 py-3 text-white disabled:bg-slate-600 bg-gray-700 hover:bg-gray-800 rounded-lg text-sm relative z-10"
+          >Повторить попытку
+          </button>
           <div class="bg-gray-200 rounded shadow">
             <h2
               class="cursor-pointer select-none block text-xl font-medium text-gray-900 ml-4"
@@ -210,7 +229,9 @@ const mergedResults = computed(() =>
                         class="flex justify-between items-center cursor-pointer"
                         @click="toggle(attempt.solutionId)"
                       >
-                        <span>Оценка: {{ attempt.mark }} (дата и время: {{ formatDate(attempt.dateTime) }})</span>
+                        <span>Оценка: {{
+                            attempt.mark
+                          }} (дата и время: {{ formatDate(attempt.dateTime) }})</span>
                         <span>{{ isOpen(attempt.solutionId) ? '▾' : '▸' }}</span>
                       </div>
 
@@ -227,7 +248,9 @@ const mergedResults = computed(() =>
                           </thead>
                           <tbody>
                           <tr v-for="sheet in attempt.userAnswerSheetList" :key="sheet.questionId">
-                            <td class="border px-4 py-2">{{ questionMap.get(sheet.questionId)?.text || 'Вопрос не найден' }}</td>
+                            <td class="border px-4 py-2">
+                              {{ questionMap.get(sheet.questionId)?.text || 'Вопрос не найден' }}
+                            </td>
                             <td class="border px-4 py-2">{{ sheet.mark }}</td>
                           </tr>
                           </tbody>
@@ -249,11 +272,16 @@ const mergedResults = computed(() =>
         </div>
         <div v-if="store.state.test.length === 0" class="ml-4">
           <div v-if="!isDisplaying">
-            <p class="mt-2 text-lg font-semibold tracking-tight text-gray-900 ">По данному видео еще не сгенерирован тест.</p>
-            <button @click="generateTest" class="mt-3 mb-4 font-semibold px-3 py-3 text-white disabled:bg-slate-600 bg-gray-700 hover:bg-gray-800 rounded-lg text-sm relative z-10">Сгенерировать</button>
+            <p class="mt-2 text-lg font-semibold tracking-tight text-gray-900 ">По данному видео еще
+              не сгенерирован тест.</p>
+            <button @click="generateTest"
+                    class="mt-3 mb-4 font-semibold px-3 py-3 text-white disabled:bg-slate-600 bg-gray-700 hover:bg-gray-800 rounded-lg text-sm relative z-10">
+              Сгенерировать
+            </button>
           </div>
           <div v-if="isDisplaying">
-            <p class="mt-2 text-lg font-semibold tracking-tight text-gray-900 ">Преподаватель еще не создал тест на выбранное видео.</p>
+            <p class="mt-2 text-lg font-semibold tracking-tight text-gray-900 ">Преподаватель еще не
+              создал тест на выбранное видео.</p>
           </div>
         </div>
       </div>

@@ -29,18 +29,17 @@ public class SpeechSynthesisController {
     public ResponseEntity<StreamingResponseBody> speechSynthesis(@RequestParam String text,
                                                                  @RequestParam Language language,
                                                                  @RequestParam Double speechRate) {
-        File audioFile  = new File(speechSynthesisService.synthesizeSpeech(text, language, speechRate));
+        File audioFile = new File(speechSynthesisService.synthesizeSpeech(text, language, speechRate));
 
         StreamingResponseBody responseBody = out -> {
-            try(InputStream in = new FileInputStream(audioFile)) {
+            try (InputStream in = new FileInputStream(audioFile)) {
                 byte[] buffer = new byte[4096];
                 int byteRead;
                 while ((byteRead = in.read(buffer)) != -1) {
                     out.write(buffer, 0, byteRead);
                 }
                 out.flush();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 log.error(e.getMessage());
             }
         };

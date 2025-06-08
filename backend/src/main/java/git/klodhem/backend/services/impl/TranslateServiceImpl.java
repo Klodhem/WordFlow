@@ -2,10 +2,12 @@ package git.klodhem.backend.services.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import git.klodhem.backend.dto.RequestTranslateDTO;
-import git.klodhem.backend.dto.ResponseTranslateDTO;
+import git.klodhem.backend.dto.yandex.RequestTranslateDTO;
+import git.klodhem.backend.dto.yandex.ResponseTranslateDTO;
+import git.klodhem.backend.exception.FileProcessingException;
 import git.klodhem.backend.services.TranslateService;
 import git.klodhem.backend.util.LanguageTranslate;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +20,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 @Service
+@Log4j2
 public class TranslateServiceImpl implements TranslateService {
     @Value("${yandex.speech.api.key}")
     private String yandexApiKey;
@@ -51,8 +54,9 @@ public class TranslateServiceImpl implements TranslateService {
         try {
             responseDTO = mapper.readValue(response.getBody(), ResponseTranslateDTO.class);
         } catch (JsonProcessingException e) {
-            //todo
-            throw new RuntimeException(e);
+            log.warn("Не удалось преобразовать ответ от Translate API в ResponseTranslateDTO: {}, \nОтвет {}",
+                    e.getMessage(), response.getBody());
+            throw new FileProcessingException(e.getMessage());
         }
 
         return responseDTO.getTranslations();

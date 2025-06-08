@@ -7,9 +7,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface SolutionRepository extends JpaRepository<Solution, Long> { // TODO name SolutionsRepository
+public interface SolutionsRepository extends JpaRepository<Solution, Long> {
     List<Solution> findByVideo_VideoId(long videoId);
 
-    List<Solution> findByVideo_VideoIdAndStudent_UserId(long videoId, long studentId);
+    List<Solution> findByVideo_VideoIdAndUser_UserId(long videoId, long userId);
 
 }

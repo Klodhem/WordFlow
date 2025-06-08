@@ -1,4 +1,4 @@
-package git.klodhem.backend.dto;
+package git.klodhem.backend.dto.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import git.klodhem.backend.util.TypeTest;

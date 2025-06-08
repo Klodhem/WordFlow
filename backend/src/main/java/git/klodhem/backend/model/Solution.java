@@ -11,7 +11,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -21,6 +23,8 @@ import java.util.List;
 @Table(name = "solutions")
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Solution {
     @Id
     @Column(name = "solution_id")
@@ -38,8 +42,8 @@ public class Solution {
     private Video video;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", referencedColumnName = "user_id")
-    private User student;
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    private User user;
 
     @OneToMany(mappedBy = "solution", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAnswerSheet> userAnswerSheetList;

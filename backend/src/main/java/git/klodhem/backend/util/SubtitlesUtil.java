@@ -1,7 +1,7 @@
 package git.klodhem.backend.util;
 
-import git.klodhem.backend.dto.ResultSpeechRecognitionDTO;
 import git.klodhem.backend.dto.SubtitleDTO;
+import git.klodhem.backend.dto.yandex.ResultSpeechRecognitionDTO;
 import git.klodhem.backend.exception.SubtitleCreateException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,13 +24,9 @@ public class SubtitlesUtil {
 
     public ArrayList<SubtitleDTO> convertToSubtitles(ArrayList<ResultSpeechRecognitionDTO> dtos) {
         ArrayList<SubtitleDTO> subtitleDTOS = new ArrayList<>();
-        //todo
-//        if (dto == null
-//                || dto.getFinalRefinement() == null
-//                || dto.getFinalRefinement().getNormalizedText() == null
-//                || dto.getFinalRefinement().getNormalizedText().getAlternatives() == null) {
-//            return subtitles;
-//        }
+        if (dtos == null || dtos.isEmpty()) {
+            return subtitleDTOS;
+        }
         dtos.forEach(dto -> {
             ResultSpeechRecognitionDTO.NormalizedText normalizedText =
                     dto.getFinalRefinement().getNormalizedText();
@@ -126,8 +122,8 @@ public class SubtitlesUtil {
     private static String convertToVttTime(String timeStr) {
         timeStr = timeStr.replace("s", "");
         long millis = Long.parseLong(timeStr);
-        int hour = (int) ((millis/1000) / 3600);
-        int minute = (int) (((millis/1000) % 3600) / 60);
+        int hour = (int) ((millis / 1000) / 3600);
+        int minute = (int) (((millis / 1000) % 3600) / 60);
         int seconds = (int) (millis / 1000) % 60;
         int ms = (int) millis % 1000;
 

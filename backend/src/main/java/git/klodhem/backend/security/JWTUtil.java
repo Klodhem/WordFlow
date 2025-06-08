@@ -6,6 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import git.klodhem.backend.model.User;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -17,25 +18,33 @@ public class JWTUtil {
     @Value("${jwt_secret}")
     private String secret;
 
+    @Value("${jwt.expiration.minutes}")
+    private long expirationMinutes;
+
+    private final static String ISSUER = "klodhem";
+    private JWTVerifier verifier;
+
+    @PostConstruct
+    public void init() {
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+        verifier = JWT.require(algorithm)
+                .withIssuer(ISSUER)
+                .build();
+    }
+
     public String generateToken(User user) {
-        Date expirationDate = Date.from(ZonedDateTime.now().plusMinutes(60).toInstant());
+        Date expirationDate = Date.from(ZonedDateTime.now().plusMinutes(expirationMinutes).toInstant());
 
         return JWT.create()
-                .withSubject("User details")
                 .withClaim("username", user.getUsername())
                 .withClaim("role", user.getRole().toString())
                 .withIssuedAt(new Date())
-                .withIssuer("klodhem")
+                .withIssuer(ISSUER)
                 .withExpiresAt(expirationDate)
                 .sign(Algorithm.HMAC256(secret));
     }
 
     public String validateTokenAndRetrieveClaim(String token) throws JWTVerificationException {
-        JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secret))
-                .withSubject("User details")
-                .withIssuer("klodhem")
-                .build();
-
         DecodedJWT jwt = verifier.verify(token);
         return jwt.getClaim("username").asString();
     }

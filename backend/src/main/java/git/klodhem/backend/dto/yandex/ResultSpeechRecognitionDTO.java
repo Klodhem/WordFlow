@@ -1,4 +1,4 @@
-package git.klodhem.backend.dto;
+package git.klodhem.backend.dto.yandex;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

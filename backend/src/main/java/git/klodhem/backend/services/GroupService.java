@@ -1,10 +1,10 @@
 package git.klodhem.backend.services;
 
-import git.klodhem.backend.dto.GroupDTO;
+import git.klodhem.backend.dto.model.GroupDTO;
 import git.klodhem.backend.dto.GroupMemberDTO;
-import git.klodhem.backend.dto.InviteDTO;
-import git.klodhem.backend.dto.StudentDTO;
-import git.klodhem.backend.dto.VideoDTO;
+import git.klodhem.backend.dto.model.InviteDTO;
+import git.klodhem.backend.dto.model.StudentDTO;
+import git.klodhem.backend.dto.model.VideoDTO;
 
 import java.util.List;
 

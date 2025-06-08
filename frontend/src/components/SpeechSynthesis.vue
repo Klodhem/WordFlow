@@ -1,6 +1,7 @@
 <script setup>
 import apiClient from '@/axios.js';
 import {onMounted, ref} from "vue";
+
 const speechRate = ref(1.0);
 const selectedLanguage = ref(null);
 const language = ref([]);
@@ -25,7 +26,7 @@ async function playSynthesizedSpeech(text) {
       },
       responseType: 'blob'
     })
-    const audioBlob = new Blob([response.data], { type: 'audio/wav' })
+    const audioBlob = new Blob([response.data], {type: 'audio/wav'})
     const audioUrl = URL.createObjectURL(audioBlob)
     const audio = new Audio(audioUrl)
     await audio.play()
@@ -54,8 +55,10 @@ onMounted(async () => {
   <div class="h-full">
     <div class="flex gap-4">
       <div class="flex-1">
-        <label for="language" class="block mb-2 text-sm font-medium text-gray-900">На каком языке синтезировать речь?</label>
-        <select id="language" v-model="selectedLanguage" class="w-full bg-gray-200 border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-gray-950 focus:border-gray-950 block p-2.5">
+        <label for="language" class="block mb-2 text-sm font-medium text-gray-900">На каком языке
+          синтезировать речь?</label>
+        <select id="language" v-model="selectedLanguage"
+                class="w-full bg-gray-200 border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-gray-950 focus:border-gray-950 block p-2.5">
           <option v-for="lang in language" :key="lang.code" :value="lang.code">
             {{ lang.name }}
           </option>
@@ -76,7 +79,8 @@ onMounted(async () => {
         <button @click="handlePlayUserText"
                 :disabled="!emit.userText"
                 class="px-3 py-1 text-white disabled:bg-slate-600 bg-gray-700 hover:bg-gray-800 rounded-lg text-sm relative z-10">
-          Озвучить</button>
+          Озвучить
+        </button>
       </div>
     </div>
   </div>

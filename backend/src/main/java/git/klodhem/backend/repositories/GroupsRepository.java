@@ -22,18 +22,18 @@ public interface GroupsRepository extends JpaRepository<Group, Long> {
     Optional<Group> findByGroupId(long groupId);
 
     @Query("""
-        SELECT v 
-        FROM   Group g 
-        JOIN   g.videos v 
-        JOIN   g.students s 
-        WHERE  g.groupId = :groupId 
-          AND  v.videoId = :videoId
-          AND  s.userId  = :userId
-    """)
+                SELECT v 
+                FROM   Group g 
+                JOIN   g.videos v 
+                JOIN   g.students s 
+                WHERE  g.groupId = :groupId 
+                  AND  v.videoId = :videoId
+                  AND  s.userId  = :userId
+            """)
     Optional<Video> findVideoInGroupForStudent(
             @Param("groupId") Long groupId,
             @Param("videoId") Long videoId,
-            @Param("userId")  Long userId
+            @Param("userId") Long userId
     );
 
 

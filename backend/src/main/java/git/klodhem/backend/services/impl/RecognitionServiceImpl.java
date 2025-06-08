@@ -1,12 +1,12 @@
 package git.klodhem.backend.services.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import git.klodhem.backend.dto.ResponseRecognitionDTO;
-import git.klodhem.backend.dto.ResultSpeechRecognitionDTO;
-import git.klodhem.backend.dto.SpeechRecognitionDTO;
+import git.klodhem.backend.dto.yandex.ResponseRecognitionDTO;
+import git.klodhem.backend.dto.yandex.ResultSpeechRecognitionDTO;
+import git.klodhem.backend.dto.yandex.SpeechRecognitionDTO;
 import git.klodhem.backend.services.RecognitionService;
 import git.klodhem.backend.util.Language;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.json.JSONArray;
@@ -32,11 +32,19 @@ import java.util.stream.Collectors;
 public class RecognitionServiceImpl implements RecognitionService {
     private final RestTemplate restTemplate;
 
+    private final ObjectMapper mapper = new ObjectMapper();
+
     @Value("${yandex.speech.api.key}")
     private String apiKey;
 
     @Value("${urlRecognitionSpeech}")
     private String urlRecognitionSpeech;
+
+    @Value("${urlOperationDone}")
+    private String urlOperationDone;
+
+    @Value("${urlRecognitionResult}")
+    private String urlRecognitionResult;
 
     @Override
     public String startAsyncRecognition(String fileUri, Language language) {
@@ -89,7 +97,7 @@ public class RecognitionServiceImpl implements RecognitionService {
 
     @Override
     public boolean isOperationDone(String operationId) {
-        String url = "https://operation.api.cloud.yandex.net/operations/" + operationId;
+        String url = urlOperationDone + operationId;
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Api-Key " + apiKey);
@@ -106,7 +114,7 @@ public class RecognitionServiceImpl implements RecognitionService {
 
     @Override
     public ArrayList<ResultSpeechRecognitionDTO> getRecognitionResult(String operationId) {
-        String url = "https://stt.api.cloud.yandex.net/stt/v3/getRecognition?operationId=" + operationId;
+        String url = urlRecognitionResult + operationId;
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Api-Key " + apiKey);
@@ -114,15 +122,9 @@ public class RecognitionServiceImpl implements RecognitionService {
 
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
         List<JSONObject> objects = getNormalizedJsonObjects(response);
-        ObjectMapper mapper = new ObjectMapper();
-        return objects.stream().map(jsonObj -> {
-            try {
-                return mapper.readValue(jsonObj.toString(), ResultSpeechRecognitionDTO.class);
-            } catch (Exception e) {
-                //todo
-                throw new RuntimeException(e);
-            }
-        }).collect(Collectors.toCollection(ArrayList::new));
+        return objects.stream()
+                .map(this::toResultSpeechRecognitionDTO)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
 
@@ -130,16 +132,16 @@ public class RecognitionServiceImpl implements RecognitionService {
         String[] responseBody = Objects.requireNonNull(response.getBody()).split("\n");
         StringBuilder speechText = new StringBuilder();
         speechText.append("[");
-        for(int i = 0; i < responseBody.length-1; i++) {
+        for (int i = 0; i < responseBody.length - 1; i++) {
             speechText.append(responseBody[i]);
             speechText.append(",\n");
         }
-        speechText.append(responseBody[responseBody.length-1]).append("]");
+        speechText.append(responseBody[responseBody.length - 1]).append("]");
         JSONArray jsonArray = new JSONArray(speechText.toString());
         List<JSONObject> jsonObjectList = new LinkedList<>();
-        for(int i = 1; i < jsonArray.length(); i++) {
+        for (int i = 1; i < jsonArray.length(); i++) {
             JSONObject object = jsonArray.getJSONObject(i).getJSONObject("result");
-            if (object.has("finalRefinement")&&object.getInt("channelTag")==0)
+            if (object.has("finalRefinement") && object.getInt("channelTag") == 0)
                 jsonObjectList.add(object);
         }
 
@@ -149,7 +151,7 @@ public class RecognitionServiceImpl implements RecognitionService {
     // TODO @Scheduled
     @Override
     public ArrayList<ResultSpeechRecognitionDTO> asyncSpeechRecognition(String fileName, Language language) {
-        String fileUri = urlRecognitionSpeech+fileName;
+        String fileUri = urlRecognitionSpeech + fileName;
         String operationId = startAsyncRecognition(fileUri, language);
 
         int attempts = 0;
@@ -166,5 +168,14 @@ public class RecognitionServiceImpl implements RecognitionService {
             }
         }
         return getRecognitionResult(operationId);
+    }
+
+    private ResultSpeechRecognitionDTO toResultSpeechRecognitionDTO(JSONObject jsonObj) {
+        try {
+            return mapper.readValue(jsonObj.toString(), ResultSpeechRecognitionDTO.class);
+        } catch (JsonProcessingException e) {
+            log.error("Не удалось распарсить JSON в ResultSpeechRecognitionDTO: {}", e.getMessage());
+            throw new IllegalStateException("Ошибка парсинга результата распознавания", e);
+        }
     }
 }

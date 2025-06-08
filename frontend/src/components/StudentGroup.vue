@@ -20,10 +20,7 @@ const groupId = Number(useRoute().params.groupId)
 
 const getVideos = async () => {
   try {
-    const response = await apiClient.get('/video/videosGroup',
-      {
-        params: { groupId: groupId }
-      })
+    const response = await apiClient.get(`/videos/group/${groupId}`)
     videos.value = response.data
   } catch (err) {
     console.log('Ошибка запроса:', err.message)
@@ -35,14 +32,13 @@ const findPhrase = async () => {
   foundTime.value = null;
 
   try {
-    const response = await apiClient.get('/video/searchPhrase', {
+    const response = await apiClient.get(`/videos/${store.state.selectedVideo.videoId}/phrase`, {
       params: {
-        videoId: store.state.selectedVideo.videoId,
         phrase: userText.value
       },
     });
     foundTime.value = response.data;
-    seekToTime(foundTime.value*0.001)
+    seekToTime(foundTime.value * 0.001)
   } catch (error) {
     if (error.response && error.response.status === 404) {
       errorMessage.value = error.response.data;
@@ -96,7 +92,8 @@ onUnmounted(() => {
         <button @click="findPhrase"
                 :disabled="!userText.trim() || !store.state.selectedVideo?.videoId"
                 class="px-3 py-1 w-full text-white disabled:bg-slate-600 bg-gray-700 hover:bg-gray-800 rounded-lg text-sm relative z-10 disabled:bg-slate-600">
-          Найти фрагмент</button>
+          Найти фрагмент
+        </button>
         <textarea
           v-model="userText"
           id="message"

@@ -74,18 +74,22 @@ const registrationForm = async () => {
             Регистрация
           </h1>
           <div>
-            <label for="username" class="block mb-2 text-sm font-medium text-gray-900 ">Кто вы?</label>
-            <select v-model="typeUser" class="w-full bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-gray-950 focus:border-gray-950 block p-2.5">
+            <label for="username" class="block mb-2 text-sm font-medium text-gray-900 ">Кто
+              вы?</label>
+            <select v-model="typeUser"
+                    class="w-full bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-gray-950 focus:border-gray-950 block p-2.5">
               <option :value="1">Студент</option>
               <option :value="2">Преподаватель</option>
             </select>
           </div>
           <form novalidate class="space-y-4 md:space-y-6" @submit.prevent="registrationForm">
             <div>
-              <label for="username" class="block mb-2 text-sm font-medium text-gray-900 ">Имя пользователя</label>
+              <label for="username" class="block mb-2 text-sm font-medium text-gray-900 ">Имя
+                пользователя</label>
               <input type="text" name="username" id="username" v-model="username"
                      :class="errors.username ? 'border-red-500' : 'border-gray-300'"
-                     class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 " placeholder=". . ." required="">
+                     class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 "
+                     placeholder=". . ." required="">
               <p v-if="errors.username" class="text-red-500 text-sm mt-1">
                 {{ errors.username }}
               </p>
@@ -94,32 +98,41 @@ const registrationForm = async () => {
               <label for="email" class="block mb-2 text-sm font-medium text-gray-900 ">Email</label>
               <input type="email" id="email" v-model="email"
                      :class="errors.email ? 'border-red-500' : 'border-gray-300'"
-                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " placeholder="name@company.com" required />
+                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                     placeholder="name@company.com" required/>
               <p v-if="errors.email" class="text-red-500 text-sm mt-1">
                 {{ errors.email }}
               </p>
             </div>
             <div class="mb-4">
-              <label for="password" class="block mb-2 text-sm font-medium text-gray-900 ">Пароль</label>
+              <label for="password"
+                     class="block mb-2 text-sm font-medium text-gray-900 ">Пароль</label>
               <input type="password" id="password" v-model="password"
                      :class="errors.password ? 'border-red-500' : 'border-gray-300'"
-                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " placeholder="•••••••••" required />
+                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                     placeholder="•••••••••" required/>
               <p v-if="errors.password" class="text-red-500 text-sm mt-1">
                 {{ errors.password }}
               </p>
             </div>
             <div class="mb-4">
-              <label for="confirm_password" class="block mb-2 text-sm font-medium text-gray-900 ">Повторите пароль</label>
+              <label for="confirm_password" class="block mb-2 text-sm font-medium text-gray-900 ">Повторите
+                пароль</label>
               <input type="password" id="confirm_password" v-model="confirmPassword"
                      :class="errors.confirmPassword ? 'border-red-500' : 'border-gray-300'"
-                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " placeholder="•••••••••" required />
+                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                     placeholder="•••••••••" required/>
               <p v-if="errors.confirmPassword" class="text-red-500 text-sm mt-1">
                 {{ errors.confirmPassword }}
               </p>
             </div>
-            <button type="submit" class="w-full text-gray-50 border-gray-700 bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Зарегистрироваться</button>
+            <button type="submit"
+                    class="w-full text-gray-50 border-gray-700 bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+              Зарегистрироваться
+            </button>
             <p class="text-sm font-light text-gray-500">
-              У вас уже есть аккаунт? <a href="/login" class="font-medium text-primary-600 hover:underline">Войти</a>
+              У вас уже есть аккаунт? <a href="/login"
+                                         class="font-medium text-primary-600 hover:underline">Войти</a>
             </p>
           </form>
         </div>

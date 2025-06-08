@@ -4,9 +4,11 @@ import {onUnmounted, reactive, ref} from "vue";
 import {useStore} from "vuex";
 import {useRoute} from "vue-router";
 
-let emit = defineProps(['videos']);
+let props = defineProps(['videos']);
+const emit = defineEmits(['update:videos'])
 const groupId = Number(useRoute().params.groupId)
 
+const route = useRoute()
 const testPairs = ref([]);
 const videoUrl = ref(null);
 const originalSubtitleUrl = ref(null);
@@ -20,14 +22,14 @@ const selectVideo = async video => {
   if (video.status === 'OK') {
     try {
       let response;
-      if(!Number.isNaN(groupId)){
-        response = await apiClient.get('/video/dictionary/'+video.videoId,{
+      if (!Number.isNaN(groupId)) {
+        response = await apiClient.get(`/videos/${video.videoId}/dictionary`, {
           params: {
             groupId: groupId
           }
         });
-      }else {
-        response = await apiClient.get('/video/dictionary/'+video.videoId);
+      } else {
+        response = await apiClient.get(`/videos/${video.videoId}/dictionary`);
       }
       testPairs.value = response.data;
       store.commit('SET_TEST_PAIRS', testPairs)
@@ -35,18 +37,17 @@ const selectVideo = async video => {
       console.log('Ошибка запроса словаря:', error.message)
     }
     let videoResponse, originalSubtitleResponse, translatedSubtitleResponse;
-    if (!Number.isNaN(groupId)){
+    if (!Number.isNaN(groupId)) {
       [videoResponse, originalSubtitleResponse, translatedSubtitleResponse] = await Promise.all([
-        fetchWithAuth(`http://localhost:8080/video/group/watch/${groupId}/${video.videoId}`),
-        fetchWithAuth(`http://localhost:8080/video/group/originalSubtitle/${groupId}/${video.videoId}`),
-        fetchWithAuth(`http://localhost:8080/video/group/translateSubtitle/${groupId}/${video.videoId}`)
+        fetchWithAuth(`http://localhost:8080/videos/group/${groupId}/${video.videoId}/watch`),
+        fetchWithAuth(`http://localhost:8080/videos/group/${groupId}/${video.videoId}/originalSubtitle`),
+        fetchWithAuth(`http://localhost:8080/videos/group/${groupId}/${video.videoId}/translateSubtitle`)
       ]);
-    }
-    else {
+    } else {
       [videoResponse, originalSubtitleResponse, translatedSubtitleResponse] = await Promise.all([
-        fetchWithAuth(`http://localhost:8080/video/watch/${video.videoId}`),
-        fetchWithAuth(`http://localhost:8080/video/originalSubtitle/${video.videoId}`),
-        fetchWithAuth(`http://localhost:8080/video/translateSubtitle/${video.videoId}`)
+        fetchWithAuth(`http://localhost:8080/videos/${video.videoId}/watch`),
+        fetchWithAuth(`http://localhost:8080/videos/${video.videoId}/originalSubtitle`),
+        fetchWithAuth(`http://localhost:8080/videos/${video.videoId}/translateSubtitle`)
       ]);
     }
     videoUrl.value = videoResponse;
@@ -87,7 +88,7 @@ const selectVideo = async video => {
             tt.mode = 'showing'
           }
         })
-      }, { once: true })
+      }, {once: true})
     }
     await getTest(video)
   }
@@ -95,7 +96,7 @@ const selectVideo = async video => {
 
 const getTest = async video => {
   try {
-    const response = await apiClient.get('/test/'+video.videoId, {
+    const response = await apiClient.get('/tests/' + video.videoId, {
       params: {
         groupId: groupId
       }
@@ -120,7 +121,7 @@ const fetchWithAuth = async (url) => {
   }
 
   const response = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: {Authorization: `Bearer ${token}`}
   })
 
   if (!response.ok) {
@@ -129,6 +130,20 @@ const fetchWithAuth = async (url) => {
   }
 
   return URL.createObjectURL(await response.blob())
+}
+
+
+const deleteVideo = async video => {
+  try {
+    const response = await apiClient.delete('/videos/' + video.videoId);
+    console.log(response.data)
+    if (response.status === 200) {
+      const updated = props.videos.filter(v => v.videoId !== video.videoId)
+      emit('update:videos', updated)
+    }
+  } catch (err) {
+    console.log('Ошибка запроса:', err.message)
+  }
 }
 
 onUnmounted(() => {
@@ -143,7 +158,7 @@ onUnmounted(() => {
     <div class="bg-gray-100 rounded shadow overflow-y-auto flex-1 min-h-0">
       <ul>
         <li
-          v-for="(video, index) in emit.videos"
+          v-for="(video, index) in props.videos"
           :key="index"
           @click="selectVideo(video)"
           class="p-2 hover:bg-gray-200 rounded text-sm md:text-base flex justify-between items-center"
@@ -165,6 +180,11 @@ onUnmounted(() => {
           >
             {{ video.status }}
           </span>
+          <button @click.stop="deleteVideo(video)"
+                  v-if="route.path === '/'"
+                  class="px-3 py-1 ml-3 text-white bg-gray-700 hover:bg-gray-800 rounded-lg text-sm relative z-10">
+            Удалить
+          </button>
         </li>
       </ul>
     </div>

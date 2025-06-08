@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 @Log4j2
 public class UserController {
     private final UserService userService;
 
-    @GetMapping("/getUser")
+    @GetMapping()
     public UserInfoDTO getUser() {
         return userService.getUserInfo();
     }

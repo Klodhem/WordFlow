@@ -1,4 +1,4 @@
-package git.klodhem.backend.dto;
+package git.klodhem.backend.dto.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UserAnswerSheetDTO {
-    private long userAnswerSheetId ;
+    private long userAnswerSheetId;
 
     private byte mark;
 

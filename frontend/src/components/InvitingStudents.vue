@@ -1,12 +1,13 @@
 <script setup>
 import apiClient from "@/axios.js";
 import {onMounted, onUnmounted, ref} from "vue";
+
 const invites = ref([])
 const intervalId = ref(null);
 
 const getInvite = async () => {
   try {
-    const response = await apiClient.get('/group/getInvite')
+    const response = await apiClient.get('/groups/invite')
     invites.value = response.data
     console.log(invites)
   } catch (err) {
@@ -16,7 +17,7 @@ const getInvite = async () => {
 
 const accept = async invite => {
   try {
-    const response = await apiClient.post(`/group/acceptInvite`, null, {
+    const response = await apiClient.post(`/groups/accept`, null, {
       params: {
         inviteId: invite.inviteId
       }
@@ -32,7 +33,7 @@ const accept = async invite => {
 
 const decline = async invite => {
   try {
-    const response = await apiClient.post(`/group/declineInvite`, null, {
+    const response = await apiClient.post(`/groups/decline`, null, {
       params: {
         inviteId: invite.inviteId
       }
@@ -59,14 +60,16 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="bg-gray-100 rounded overflow-y-auto h-full flex justify-center items-center">
+  <div class="bg-gray-100 rounded overflow-y-auto flex justify-center items-center max-h-full">
     <ul v-if="!invites.value" class="shadow w-full px-4">
       <li
         v-for="(invite, index) in invites"
         :key="index"
         class="p-4 hover:bg-gray-200 rounded text-sm md:text-base flex flex-wrap justify-between items-center"
       >
-        <span class="flex-1">Пользователь: {{ invite.nameTeacher }} пригласил вас в группу {{ invite.groupName }}</span>
+        <span class="flex-1">Пользователь "{{
+            invite.nameTeacher
+          }}" пригласил вас в группу "{{ invite.groupName }}"</span>
         <div class="flex gap-2 shrink-0">
           <button
             @click="accept(invite)"

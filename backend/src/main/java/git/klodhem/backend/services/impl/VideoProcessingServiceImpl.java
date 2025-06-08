@@ -1,9 +1,9 @@
 package git.klodhem.backend.services.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import git.klodhem.backend.dto.ResponseTranslateDTO;
-import git.klodhem.backend.dto.ResultSpeechRecognitionDTO;
 import git.klodhem.backend.dto.SubtitleDTO;
+import git.klodhem.backend.dto.yandex.ResponseTranslateDTO;
+import git.klodhem.backend.dto.yandex.ResultSpeechRecognitionDTO;
 import git.klodhem.backend.services.RecognitionService;
 import git.klodhem.backend.services.TestService;
 import git.klodhem.backend.services.TranslateService;
@@ -52,37 +52,37 @@ public class VideoProcessingServiceImpl implements VideoProcessingService {
 //        localStorageService.uploadToStorage(file, uuidName);
 
         long videoId = fileUploadServiceImpl.uploadFile(file, title, fileName);
-        String originalType = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
-        String audioPath = audioService.extractAudioFromVideo(fileName, originalType);
-
-        awsServiceImpl.uploadToStorage(audioPath);
-
-        ArrayList<ResultSpeechRecognitionDTO> dtoList = recognitionService.asyncSpeechRecognition(audioPath, language);
-
-        ArrayList<SubtitleDTO> subtitleDTOS = subtitlesUtil.convertToSubtitles(dtoList);
-        String originalText = subtitleDTOS.stream()
-                .map(SubtitleDTO::getText)
-                .collect(Collectors.joining(" "));
-
-        JsonNode jsonNode = jsonUtil.createJson(language, subtitleDTOS);
-        String originalVtt = subtitlesUtil.createVttSubtitles(subtitleDTOS, fileName, language.getCode());
-        List<String> originals = new LinkedList<>();
-        subtitleDTOS.forEach(subtitleDTO -> {
-            originals.add(subtitleDTO.getText());
-        });
-        List<ResponseTranslateDTO.TranslateDTO> translatePhrase = translateService.translateList(originals, languageTranslate);
-        for (int i = 0; i < subtitleDTOS.size(); i++) {
-            subtitleDTOS.get(i).setText(translatePhrase.get(i).getText());
-        }
-        String translateText = subtitleDTOS.stream()
-                .map(SubtitleDTO::getText)
-                .collect(Collectors.joining(" "));
-        jsonNode = jsonUtil.addTranslate(jsonNode, languageTranslate, subtitleDTOS);
-        String translateVtt = subtitlesUtil.createVttSubtitles(subtitleDTOS, fileName, languageTranslate.getCode());
-        videoService.saveProposalsAndTexts(videoId, jsonNode, originalText, translateText, originalVtt, translateVtt);
-        if (generateTest) {
-            testService.generatedTest(videoId);
-        }
+//        String originalType = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+//        String audioPath = audioService.extractAudioFromVideo(fileName, originalType);
+//
+//        awsServiceImpl.uploadToStorage(audioPath);
+//
+//        ArrayList<ResultSpeechRecognitionDTO> dtoList = recognitionService.asyncSpeechRecognition(audioPath, language);
+//
+//        ArrayList<SubtitleDTO> subtitleDTOS = subtitlesUtil.convertToSubtitles(dtoList);
+//        String originalText = subtitleDTOS.stream()
+//                .map(SubtitleDTO::getText)
+//                .collect(Collectors.joining(" "));
+//
+//        JsonNode jsonNode = jsonUtil.createJson(language, subtitleDTOS);
+//        String originalVtt = subtitlesUtil.createVttSubtitles(subtitleDTOS, fileName, language.getCode());
+//        List<String> originals = subtitleDTOS.stream()
+//                .map(SubtitleDTO::getText)
+//                .collect(Collectors.toCollection(LinkedList::new));
+//
+//        List<ResponseTranslateDTO.TranslateDTO> translatePhrase = translateService.translateList(originals, languageTranslate);
+//        for (int i = 0; i < subtitleDTOS.size(); i++) {
+//            subtitleDTOS.get(i).setText(translatePhrase.get(i).getText());
+//        }
+//        String translateText = subtitleDTOS.stream()
+//                .map(SubtitleDTO::getText)
+//                .collect(Collectors.joining(" "));
+//        jsonNode = jsonUtil.addTranslate(jsonNode, languageTranslate, subtitleDTOS);
+//        String translateVtt = subtitlesUtil.createVttSubtitles(subtitleDTOS, fileName, languageTranslate.getCode());
+//        videoService.saveProposalsAndTexts(videoId, jsonNode, originalText, translateText, originalVtt, translateVtt);
+//        if (generateTest) {
+//            testService.generatedTest(videoId);
+//        }
         return true;
     }
 

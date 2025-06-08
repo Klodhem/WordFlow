@@ -1,6 +1,6 @@
 package git.klodhem.backend.services;
 
-import git.klodhem.backend.dto.ResponseTranslateDTO;
+import git.klodhem.backend.dto.yandex.ResponseTranslateDTO;
 import git.klodhem.backend.util.LanguageTranslate;
 
 import java.util.List;

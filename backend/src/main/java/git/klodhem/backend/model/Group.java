@@ -11,7 +11,9 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
@@ -20,6 +22,8 @@ import java.util.List;
 @Table(name = "groups")
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Group {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,16 +41,16 @@ public class Group {
     @ManyToMany
     @JoinTable(
             name = "groups_users",
-            joinColumns = @JoinColumn(name="group_id"),
-            inverseJoinColumns = @JoinColumn(name="user_id")
+            joinColumns = @JoinColumn(name = "group_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private List<User> students;
 
     @ManyToMany
     @JoinTable(
             name = "groups_videos",
-            joinColumns = @JoinColumn(name="group_id"),
-            inverseJoinColumns = @JoinColumn(name="video_id")
+            joinColumns = @JoinColumn(name = "group_id"),
+            inverseJoinColumns = @JoinColumn(name = "video_id")
     )
     private List<Video> videos;
 }

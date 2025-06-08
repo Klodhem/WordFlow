@@ -41,13 +41,13 @@ public class SpeechSynthesisServiceImpl implements SpeechSynthesisService {
     @Override
     public String synthesizeSpeech(String text, Language language, double speechRate) {
         String hashText = String.valueOf(text.hashCode());
-        String wavPath = "synthesizeSpeech/"+hashText+"_"+speechRate+".wav";
+        String wavPath = "synthesizeSpeech/" + hashText + "_" + speechRate + ".wav";
         File file = new File(wavPath);
         if (file.exists()) {
             log.debug("Файл уже существует");
             return file.getAbsolutePath();
         }
-        Path rawPath = Paths.get("synthesizeSpeech/"+hashText+".raw");
+        Path rawPath = Paths.get("synthesizeSpeech/" + hashText + ".raw");
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("text", text);
         params.add("lang", language.getCode());

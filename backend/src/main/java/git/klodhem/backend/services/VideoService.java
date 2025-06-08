@@ -1,7 +1,7 @@
 package git.klodhem.backend.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import git.klodhem.backend.dto.VideoDTO;
+import git.klodhem.backend.dto.model.VideoDTO;
 import git.klodhem.backend.dto.TranslateProposalDTO;
 import git.klodhem.backend.model.Video;
 
@@ -16,7 +16,7 @@ public interface VideoService {
 
 //    String getPath(long videoId);
 
-    List<VideoDTO> getVideosDTO();
+    List<VideoDTO> getVideos();
 
     File getVideoFile(long videoId, Long groupId);
 
@@ -31,4 +31,6 @@ public interface VideoService {
     Video getVideoById(long id);
 
     List<VideoDTO> getVideosGroupDTO(long groupId);
+
+    void deleteVideo(long videoId);
 }

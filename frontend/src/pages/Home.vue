@@ -20,7 +20,7 @@ const videos = ref([])
 
 const getVideos = async () => {
   try {
-    const response = await apiClient.get('/video/getVideos')
+    const response = await apiClient.get('/videos')
     videos.value = response.data
   } catch (err) {
     console.log('Ошибка запроса:', err.message)
@@ -32,14 +32,13 @@ const findPhrase = async () => {
   foundTime.value = null;
 
   try {
-    const response = await apiClient.get('/video/searchPhrase', {
+    const response = await apiClient.get(`/videos/${store.state.selectedVideo.videoId}/phrase`, {
       params: {
-        videoId: store.state.selectedVideo.videoId,
         phrase: userText.value
       },
     });
     foundTime.value = response.data;
-    seekToTime(foundTime.value*0.001)
+    seekToTime(foundTime.value * 0.001)
   } catch (error) {
     if (error.response && error.response.status === 404) {
       errorMessage.value = error.response.data;
@@ -84,24 +83,25 @@ onUnmounted(() => {
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-min items-start">
     <div class="bg-gray-100 rounded shadow flex flex-col p-2 gap-4 min-h-0 h-[27.2rem]">
       <FileUpload @refresh-videos="getVideos"/>
-      <SelectVideo :videos="videos"></SelectVideo>
+      <SelectVideo v-model:videos="videos"></SelectVideo>
     </div>
 
-    <div class="bg-gray-100 rounded shadow p-2 flex flex-col justify-center gap-4 h-[27.2rem]" >
-        <h3 class="block text-lg font-medium text-gray-900 ">Работа с речью</h3>
-        <SpeechSynthesis :userText="userText"></SpeechSynthesis>
+    <div class="bg-gray-100 rounded shadow p-2 flex flex-col justify-center gap-4 h-[27.2rem]">
+      <h3 class="block text-lg font-medium text-gray-900 ">Работа с речью</h3>
+      <SpeechSynthesis :userText="userText"></SpeechSynthesis>
       <div class="w-full">
         <button @click="findPhrase"
                 :disabled="!userText.trim() || !store.state.selectedVideo?.videoId"
-                class="px-3 py-1 w-full text-white disabled:bg-slate-600 bg-gray-700 hover:bg-gray-800 rounded-lg text-sm relative z-10 disabled:bg-slate-600">
-          Найти фрагмент</button>
-              <textarea
-                v-model="userText"
-                id="message"
-                rows="4"
-                class="resize-none w-full block p-2.5 text-gray-100 bg-gray-600 rounded-lg border
+                class="px-3 py-1 w-full text-white bg-gray-700 hover:bg-gray-800 rounded-lg text-sm relative z-10 disabled:bg-slate-600">
+          Найти фрагмент
+        </button>
+        <textarea
+          v-model="userText"
+          id="message"
+          rows="4"
+          class="resize-none w-full block p-2.5 text-gray-100 bg-gray-600 rounded-lg border
               border-gray-300 text-sm md:text-base h-44"
-                placeholder="Введите текст..."></textarea>
+          placeholder="Введите текст..."></textarea>
       </div>
     </div>
   </div>

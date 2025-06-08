@@ -27,7 +27,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Override
     public long uploadFile(MultipartFile file, String title, String fileName) {
-        try(InputStream inputStream = file.getInputStream()) {
+        try (InputStream inputStream = file.getInputStream()) {
             if (file.isEmpty()) {
                 log.warn("Файл пустой");
                 throw new FileUploadException("Файл пустой");
@@ -40,12 +40,11 @@ public class FileUploadServiceImpl implements FileUploadService {
             }
             String formatFile = Objects.requireNonNull(file.getOriginalFilename())
                     .substring(file.getOriginalFilename().lastIndexOf("."));
-            Path filePath = path.resolve(fileName+formatFile);
+            Path filePath = path.resolve(fileName + formatFile);
             Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
             log.debug("Файл сохранён");
             return videoService.saveVideo(title, filePath.toString());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Ошибка при загрузке файла: {}", e.getMessage(), e);
             throw new FileUploadException(e.getMessage());
         }

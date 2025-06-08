@@ -1,8 +1,9 @@
 package git.klodhem.backend.services.impl;
 
-import git.klodhem.backend.dto.YandexGPTRequestDTO;
-import git.klodhem.backend.dto.YandexGPTResponseDTO;
+import git.klodhem.backend.dto.yandex.YandexGPTRequestDTO;
+import git.klodhem.backend.dto.yandex.YandexGPTResponseDTO;
 import git.klodhem.backend.services.YandexGPTService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import jakarta.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -55,8 +55,6 @@ public class YandexGPTServiceImpl implements YandexGPTService {
     }
 
 
-
-
     private String sendMassageYandexGPT(String text) {
         String url = "https://llm.api.cloud.yandex.net/foundationModels/v1/completionAsync";
 
@@ -81,7 +79,7 @@ public class YandexGPTServiceImpl implements YandexGPTService {
                 )
                 .messages(List.of(
                         YandexGPTRequestDTO.Message.builder().role("system").text("The test should contain " + 5 + " questions. "
-                                +testGenerationPrompt).build(),
+                                + testGenerationPrompt).build(),
                         YandexGPTRequestDTO.Message.builder().role("user").text(text).build()
                 ))
                 .build();
@@ -97,7 +95,7 @@ public class YandexGPTServiceImpl implements YandexGPTService {
         }
     }
 
-    private String pollResult(String operationId){
+    private String pollResult(String operationId) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Api-Key " + apiKey);
@@ -112,15 +110,14 @@ public class YandexGPTServiceImpl implements YandexGPTService {
                         new HttpEntity<>(headers),
                         YandexGPTResponseDTO.class);
                 YandexGPTResponseDTO body = getResp.getBody();
-                if (body!=null && body.isDone()) {
+                if (body != null && body.isDone()) {
                     return body.getResponse()
                             .getAlternatives().getFirst()
                             .getMessage().getText();
                 }
                 System.out.println("not yet");
                 attempts++;
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 log.error(e);
             }
         }

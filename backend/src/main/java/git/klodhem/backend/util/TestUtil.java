@@ -24,13 +24,13 @@ public class TestUtil {
 
             question.setText(lines[1].substring(10));
 
-            String[] answers = lines[2].substring(10, lines[2].length()-2).split("\\|");
+            String[] answers = lines[2].substring(10, lines[2].length() - 2).split("\\|");
             List<Answer> answerList = new ArrayList<>();
             for (String answer : answers) {
                 Answer answerObject = new Answer();
                 int ind = answer.lastIndexOf("·");
                 answerObject.setText(answer.substring(0, ind));
-                if (answer.substring(ind+1).equals("true")){
+                if (answer.substring(ind + 1).equals("true")) {
                     answerObject.setCorrect(true);
                     countCorrectAnswers++;
                 }

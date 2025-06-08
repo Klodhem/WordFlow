@@ -21,7 +21,7 @@ public class YandexStorageConfig {
     private String SECRET_KEY;
 
     @Value("${REGION}")
-    private String REGION ;
+    private String REGION;
 
     @Value("${S3_ENDPOINT}")
     private String S3_ENDPOINT;

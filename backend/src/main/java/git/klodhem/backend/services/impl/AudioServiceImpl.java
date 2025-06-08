@@ -1,6 +1,7 @@
 package git.klodhem.backend.services.impl;
 
 import git.klodhem.backend.services.AudioService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import net.bramp.ffmpeg.FFmpeg;
@@ -22,6 +23,7 @@ import java.nio.file.Paths;
 @Log4j2
 @RequiredArgsConstructor
 public class AudioServiceImpl implements AudioService {
+
     @Value("${ffmpegPath}")
     private String ffmpegPath;
 
@@ -34,9 +36,23 @@ public class AudioServiceImpl implements AudioService {
     @Value("${app.upload.directory}")
     private String DIRECTORY_UPLOAD;
 
-    public void convertRawToWav(String inputFilePath, String outputFilePath){
+    private FFmpeg ffmpeg;
+    private FFprobe ffprobe;
+
+    @PostConstruct
+    private void init() {
         try {
-            FFmpeg ffmpeg = new FFmpeg(ffmpegPath);
+            this.ffmpeg = new FFmpeg(ffmpegPath);
+            this.ffprobe = new FFprobe(ffprobePath);
+            log.debug("FFmpeg и FFprobe инициализированы: {}, {}", ffmpegPath, ffprobePath);
+        } catch (IOException e) {
+            log.error("Не удалось инициализировать FFmpeg/FFprobe: {}", e.getMessage());
+            throw new IllegalStateException("Ошибка инициализации FFmpeg", e);
+        }
+    }
+
+    public void convertRawToWav(String inputFilePath, String outputFilePath) {
+        try {
             FFmpegExecutor executor = new FFmpegExecutor(ffmpeg);
 
             FFmpegBuilder builder = new FFmpegBuilder()
@@ -50,8 +66,7 @@ public class AudioServiceImpl implements AudioService {
                     .done();
             executor.createJob(builder).run();
             log.debug("Файл успешно конвертирован из формата RAW в WAV.");
-        }
-        catch (IOException e){
+        } catch (IOException e) {
             log.error("Ошибка при конвертации файла из формата RAW в WAV: {}", e.getMessage());
         }
     }
@@ -59,41 +74,34 @@ public class AudioServiceImpl implements AudioService {
 
     @Override
     public String extractAudioFromVideo(String fileName, String type) {
-        String audioPath = fileName+"_audio.wav";
+        String audioPath = fileName + "_audio.wav";
         try {
-            FFmpeg ffmpeg = new FFmpeg(ffmpegPath);
-            FFprobe ffprobe = new FFprobe(ffprobePath);
             FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
-            Path inputPath = Paths.get(DIRECTORY_UPLOAD+fileName+type);
+            Path inputPath = Paths.get(DIRECTORY_UPLOAD + fileName + type);
 
             if (!Files.exists(inputPath)) {
-                throw new IOException("Входной файл не найден: " + DIRECTORY_UPLOAD+fileName+type);
+                throw new IOException("Входной файл не найден: " + DIRECTORY_UPLOAD + fileName + type);
             }
-            Path outputPath = Paths.get(DIRECTORY+audioPath).getParent();
+            Path outputPath = Paths.get(DIRECTORY + audioPath).getParent();
             if (outputPath != null && !Files.exists(outputPath)) {
                 Files.createDirectories(outputPath);
             }
 
             FFmpegBuilder builder = new FFmpegBuilder()
-                    .setInput(DIRECTORY_UPLOAD+fileName+type)
-                    .addOutput(DIRECTORY+audioPath)
+                    .setInput(DIRECTORY_UPLOAD + fileName + type)
+                    .addOutput(DIRECTORY + audioPath)
                     .setFormat("wav")
                     .setAudioCodec("pcm_s16le")
                     .disableVideo()
                     .done();
 
-            FFmpegJob job = executor.createJob(builder, new ProgressListener() {
-                @Override
-                public void progress(Progress progress) {
-                    log.debug("Прогресс: {} ms", progress.out_time_ns / 1_000_000);
-                }
-            });
+            FFmpegJob job = executor.createJob(builder, progress -> log.debug("Прогресс: {} ms",
+                    progress.out_time_ns / 1_000_000));
             job.run();
             if (job.getState() == FFmpegJob.State.FAILED) {
                 throw new IOException("Ошибка при извлечении аудио");
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Ошибка при извлечении аудио: {}", e.getMessage());
             throw new RuntimeException(e.getMessage());
         }

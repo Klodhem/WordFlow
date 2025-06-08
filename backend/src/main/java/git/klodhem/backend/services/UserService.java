@@ -1,7 +1,6 @@
 package git.klodhem.backend.services;
 
 import git.klodhem.backend.dto.UserInfoDTO;
-import git.klodhem.backend.dto.UserLoginDTO;
 import git.klodhem.backend.model.Student;
 import git.klodhem.backend.model.Teacher;
 import git.klodhem.backend.model.User;

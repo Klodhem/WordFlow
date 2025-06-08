@@ -7,7 +7,6 @@ import git.klodhem.backend.model.Teacher;
 import git.klodhem.backend.model.User;
 import git.klodhem.backend.repositories.UsersRepository;
 import git.klodhem.backend.services.UserService;
-import git.klodhem.backend.util.RoleUser;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.common.aliasing.qual.Unique;
 import org.modelmapper.ModelMapper;
@@ -55,8 +54,7 @@ public class UserServiceImpl implements UserService {
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             return convertToUserInfoDTO(user);
-        }
-        else throw new UserNotFoundException("Пользователь не найден в БДы");
+        } else throw new UserNotFoundException("Пользователь не найден в БД");
     }
 
     private UserInfoDTO convertToUserInfoDTO(User user) {

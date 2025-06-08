@@ -1,5 +1,6 @@
-package git.klodhem.backend.dto;
+package git.klodhem.backend.dto.model;
 
+import git.klodhem.backend.dto.UserInfoDTO;
 import lombok.Getter;
 import lombok.Setter;
 

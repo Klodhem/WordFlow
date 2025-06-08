@@ -17,7 +17,9 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
 
@@ -27,6 +29,8 @@ import java.util.List;
 @Table(name = "videos")
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Video {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

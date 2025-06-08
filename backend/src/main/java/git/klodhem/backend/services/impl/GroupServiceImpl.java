@@ -1,10 +1,10 @@
 package git.klodhem.backend.services.impl;
 
-import git.klodhem.backend.dto.GroupDTO;
 import git.klodhem.backend.dto.GroupMemberDTO;
-import git.klodhem.backend.dto.InviteDTO;
-import git.klodhem.backend.dto.StudentDTO;
-import git.klodhem.backend.dto.VideoDTO;
+import git.klodhem.backend.dto.model.GroupDTO;
+import git.klodhem.backend.dto.model.InviteDTO;
+import git.klodhem.backend.dto.model.StudentDTO;
+import git.klodhem.backend.dto.model.VideoDTO;
 import git.klodhem.backend.model.Group;
 import git.klodhem.backend.model.Invite;
 import git.klodhem.backend.model.Student;
@@ -67,19 +67,16 @@ public class GroupServiceImpl implements GroupService {
         if (optionalInvite.isPresent()) {
             return false;
         }
-        User currentUser = getCurrentUser();
-        if (currentUser.getRole()!= RoleUser.ROLE_TEACHER){
-            return false;
-        }
+
         Invite invite = new Invite();
         Group group = new Group();
         group.setGroupId(groupId);
         invite.setGroup(group);
-        invite.setTeacher((Teacher) currentUser);
+        invite.setTeacher((Teacher) getCurrentUser());
 
         Optional<User> optionalStudent = userService.findByUsername(username);
         if (optionalStudent.isEmpty()) {
-           return false;
+            return false;
         }
         invite.setStudent((Student) optionalStudent.get());
         invite.setStatusInvite(StatusInvite.EXPECTED);
@@ -89,24 +86,17 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public boolean createGroup(String groupName) {
-        User currentUser = getCurrentUser();
-        if (currentUser.getRole()!= RoleUser.ROLE_TEACHER){
-            return false;
-        }
         Group group = new Group();
         group.setGroupName(groupName);
-        group.setOwner(currentUser);
+        group.setOwner(getCurrentUser());
         groupsRepository.save(group);
         return true;
     }
 
     @Override
     public List<StudentDTO> getStudents(long groupId) {
-        if (getCurrentUser().getRole()!= RoleUser.ROLE_TEACHER){
-            return List.of();
-        }
         Optional<Group> optionalGroup = groupsRepository.findByGroupId(groupId);
-        if (optionalGroup.isEmpty()){
+        if (optionalGroup.isEmpty()) {
             return List.of();
         }
         List<User> students = optionalGroup.get().getStudents();
@@ -117,11 +107,8 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public List<VideoDTO> getVideos(long groupId) {
-        if (getCurrentUser().getRole()!= RoleUser.ROLE_TEACHER){
-            return List.of();
-        }
         Optional<Group> optionalGroup = groupsRepository.findByGroupId(groupId);
-        if (optionalGroup.isEmpty()){
+        if (optionalGroup.isEmpty()) {
             return List.of();
         }
         List<Video> students = optionalGroup.get().getVideos();
@@ -137,18 +124,14 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public boolean removeMember(long memberId, long groupId) {
-        if (getCurrentUser().getRole()!= RoleUser.ROLE_TEACHER){
-            return false;
-        }
         Optional<Invite> optionalInvite = inviteRepository.findByGroup_GroupIdAndStudent_UserId(groupId, memberId);
-        if (optionalInvite.isEmpty()){
+        if (optionalInvite.isEmpty()) {
             return false;
         }
         if (optionalInvite.get().getStatusInvite() == StatusInvite.EXPECTED
-                || optionalInvite.get().getStatusInvite() == StatusInvite.DECLINED){
+                || optionalInvite.get().getStatusInvite() == StatusInvite.DECLINED) {
             inviteRepository.delete(optionalInvite.get());
-        }
-        else if (optionalInvite.get().getStatusInvite() == StatusInvite.ACCEPTED){
+        } else if (optionalInvite.get().getStatusInvite() == StatusInvite.ACCEPTED) {
             inviteRepository.delete(optionalInvite.get());
             groupsRepository.deleteGroupUserRelation(groupId, memberId);
         }
@@ -157,11 +140,8 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public boolean updateGroupVideos(List<VideoDTO> videoDTOS, long groupId) {
-        if (getCurrentUser().getRole()!= RoleUser.ROLE_TEACHER){
-            return false;
-        }
         Optional<Group> optionalGroup = groupsRepository.findByGroupIdAndOwner_UserId(groupId, getCurrentUser().getUserId());
-        if (optionalGroup.isEmpty()){
+        if (optionalGroup.isEmpty()) {
             return false;
         }
         Group group = optionalGroup.get();
@@ -186,7 +166,7 @@ public class GroupServiceImpl implements GroupService {
     public boolean acceptInvite(long inviteId) {
         Optional<Invite> optionalInvite = inviteRepository
                 .findByInviteIdAndStudent_UserId(inviteId, getCurrentUser().getUserId());
-        if (optionalInvite.isEmpty()){
+        if (optionalInvite.isEmpty()) {
             return false;
         }
         Invite invite = optionalInvite.get();
@@ -202,7 +182,7 @@ public class GroupServiceImpl implements GroupService {
     public boolean declineInvite(long inviteId) {
         Optional<Invite> optionalInvite = inviteRepository
                 .findByInviteIdAndStudent_UserId(inviteId, getCurrentUser().getUserId());
-        if (optionalInvite.isEmpty()){
+        if (optionalInvite.isEmpty()) {
             return false;
         }
         Invite invite = optionalInvite.get();
@@ -218,6 +198,7 @@ public class GroupServiceImpl implements GroupService {
     private GroupDTO convertToGroupDTO(Group group) {
         return modelMapper.map(group, GroupDTO.class);
     }
+
     private VideoDTO convertToVideoDTO(Video video) {
         return modelMapper.map(video, VideoDTO.class);
     }

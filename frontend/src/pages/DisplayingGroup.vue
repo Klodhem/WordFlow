@@ -16,13 +16,13 @@ onMounted(() => {
   typeUser.value = localStorage.getItem('typeUser')
 })
 
-onUnmounted(()=>{
-  store.state.selectedGroupId=null;
+onUnmounted(() => {
+  store.state.selectedGroupId = null;
 })
 </script>
 
 <template>
-  <component :is="currentComponent" />
+  <component :is="currentComponent"/>
 </template>
 
 <style scoped>

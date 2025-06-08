@@ -6,7 +6,9 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
@@ -15,14 +17,14 @@ import java.util.List;
 @DiscriminatorValue("ROLE_STUDENT")
 @Getter
 @Setter
-public class Student extends User{
+@AllArgsConstructor
+@NoArgsConstructor
+public class Student extends User {
     @ManyToMany(mappedBy = "users")
     private List<Group> groups;
 
-    @OneToMany(mappedBy = "student")
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Invite> invites;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Solution> solutions;
 }
