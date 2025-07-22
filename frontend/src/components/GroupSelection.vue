@@ -43,7 +43,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="bg-gray-100 rounded shadow h-44 overflow-y-auto">
+  <div class="bg-gray-100 rounded overflow-y-auto">
     <ul>
       <li
         v-for="(group, index) in groups"

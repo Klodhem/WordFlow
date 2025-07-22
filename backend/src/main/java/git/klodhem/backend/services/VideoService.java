@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import git.klodhem.backend.dto.model.VideoDTO;
 import git.klodhem.backend.dto.TranslateProposalDTO;
 import git.klodhem.backend.model.Video;
+import org.springframework.core.io.support.ResourceRegion;
+import org.springframework.http.HttpHeaders;
 
 import java.io.File;
 import java.util.List;
@@ -33,4 +35,6 @@ public interface VideoService {
     List<VideoDTO> getVideosGroupDTO(long groupId);
 
     void deleteVideo(long videoId);
+
+    ResourceRegion getVideoRegion(long videoId, Long groupId, HttpHeaders headers);
 }

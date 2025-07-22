@@ -126,31 +126,13 @@ public class VideoController {
 
     @GetMapping("/{videoId}/watch")
     public ResponseEntity<ResourceRegion> streamVideo(@PathVariable long videoId, @RequestHeader HttpHeaders headers) {
-        File videoFile = videoService.getVideoFile(videoId, null);
-        long contentLength = videoFile.length();
-
-        Resource videoResource = new FileSystemResource(videoFile);
-        HttpRange range = headers.getRange().stream().findFirst().orElse(null);
-
-        ResourceRegion region;
-        if (range != null) {
-            long start = range.getRangeStart(contentLength);
-            long end = range.getRangeEnd(contentLength);
-
-            if (end >= contentLength) {
-                end = start + CHUNK_SIZE - 1;
-            }
-
-            long requestedSize = end - start + 1;
-            long rangeLength = Math.max(requestedSize, CHUNK_SIZE);
-            rangeLength = Math.min(rangeLength, contentLength - start);
-            region = new ResourceRegion(videoResource, start, rangeLength);
-        } else {
-            region = new ResourceRegion(videoResource, 0, contentLength);
-        }
+        ResourceRegion region = videoService.getVideoRegion(videoId, null, headers);
+        MediaType mediaType = MediaTypeFactory
+                .getMediaType(region.getResource())
+                .orElse(MediaType.APPLICATION_OCTET_STREAM);
 
         return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
-                .contentType(MediaTypeFactory.getMediaType(videoResource).orElse(MediaType.APPLICATION_OCTET_STREAM))
+                .contentType(mediaType)
                 .body(region);
     }
 
@@ -161,31 +143,12 @@ public class VideoController {
 
     @GetMapping("/group/{groupId}/{videoId}/watch")
     public ResponseEntity<ResourceRegion> streamVideoGroup(@PathVariable long videoId, @PathVariable long groupId, @RequestHeader HttpHeaders headers) {
-        File videoFile = videoService.getVideoFile(videoId, groupId);
-        long contentLength = videoFile.length();
-
-        Resource videoResource = new FileSystemResource(videoFile);
-        HttpRange range = headers.getRange().stream().findFirst().orElse(null);
-
-        ResourceRegion region;
-        if (range != null) {
-            long start = range.getRangeStart(contentLength);
-            long end = range.getRangeEnd(contentLength);
-
-            if (end >= contentLength) {
-                end = start + CHUNK_SIZE - 1;
-            }
-
-            long requestedSize = end - start + 1;
-            long rangeLength = Math.max(requestedSize, CHUNK_SIZE);
-            rangeLength = Math.min(rangeLength, contentLength - start);
-            region = new ResourceRegion(videoResource, start, rangeLength);
-        } else {
-            region = new ResourceRegion(videoResource, 0, contentLength);
-        }
-
+        ResourceRegion region = videoService.getVideoRegion(videoId, groupId, headers);
+        MediaType mediaType = MediaTypeFactory
+                .getMediaType(region.getResource())
+                .orElse(MediaType.APPLICATION_OCTET_STREAM);
         return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
-                .contentType(MediaTypeFactory.getMediaType(videoResource).orElse(MediaType.APPLICATION_OCTET_STREAM))
+                .contentType(mediaType)
                 .body(region);
     }
 

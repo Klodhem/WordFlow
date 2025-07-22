@@ -44,8 +44,7 @@ public class AuthController {
     public Map<String, String> performRegistration(@RequestBody @Validated UserLoginDTO userLoginDTO) {
         Student student = convertToStudent(userLoginDTO);
         userValidator.validate(student);
-//        String field = bindingResult.getFieldError().getField();
-
+        student.setRole(RoleUser.ROLE_STUDENT);
         userService.registerStudent(student);
 
         String token = jwtUtil.generateToken(student);

@@ -42,7 +42,7 @@ const getStudentsAndVideosGroup = async () => {
   try {
     let response = await apiClient.get(`/groups/${groupId}/students`)
     students.value = response.data
-    response = await apiClient.get(`/groups/${groupId}/videos`)
+    response = await apiClient.get(`/videos/group/${groupId}`)
     videos.value = response.data
     selectedVideosTeacher.value = response.data
   } catch (err) {

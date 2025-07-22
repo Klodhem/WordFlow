@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import git.klodhem.backend.dto.yandex.ResponseRecognitionDTO;
 import git.klodhem.backend.dto.yandex.ResultSpeechRecognitionDTO;
 import git.klodhem.backend.dto.yandex.SpeechRecognitionDTO;
+import git.klodhem.backend.exception.SpeechRecognitionException;
 import git.klodhem.backend.services.RecognitionService;
 import git.klodhem.backend.util.Language;
 import lombok.RequiredArgsConstructor;
@@ -161,10 +162,9 @@ public class RecognitionServiceImpl implements RecognitionService {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            System.out.println("NOT Yet");
             attempts++;
             if (attempts > 60) {
-                throw new RuntimeException("Превышено время ожидания распознавания.");
+                throw new SpeechRecognitionException("Превышено время ожидания распознавания.");
             }
         }
         return getRecognitionResult(operationId);

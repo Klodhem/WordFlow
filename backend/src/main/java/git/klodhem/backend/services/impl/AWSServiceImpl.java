@@ -48,6 +48,5 @@ public class AWSServiceImpl implements AWSService {
             log.error("Ошибка при отправке файла на Storage: {}", fileName, e);
             throw new RuntimeException("Ошибка загрузки: " + fileName, e);
         }
-        log.info("Файл успешно загружен!");
     }
 }

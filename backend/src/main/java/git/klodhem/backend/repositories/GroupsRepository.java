@@ -39,14 +39,13 @@ public interface GroupsRepository extends JpaRepository<Group, Long> {
 
     Optional<Group> findByGroupIdAndOwner_UserId(long groupId, long userId);
 
-    @Query(value =
-            "SELECT u.user_id   AS userId,\n" +
-                    "       u.username      AS name,\n" +
-                    "       COALESCE(i.status_invite, 'ACCEPTED') AS status\n" +
-                    "  FROM users u\n" +
-                    "  LEFT JOIN invites i ON i.group_id = :groupId AND i.student_id = u.user_id\n" +
-                    "  LEFT JOIN groups_users gu ON gu.group_id = :groupId AND gu.user_id = u.user_id\n" +
-                    " WHERE i.group_id = :groupId OR gu.group_id = :groupId",
+    @Query(value = """
+    SELECT u.user_id AS userId, u.username AS name, COALESCE(i.status_invite, 'ACCEPTED') AS status
+    FROM users u
+    LEFT JOIN invites i ON i.group_id = :groupId AND i.student_id = u.user_id
+    LEFT JOIN groups_users gu ON gu.group_id = :groupId AND gu.user_id = u.user_id
+    WHERE i.group_id = :groupId OR gu.group_id = :groupId
+    """,
             nativeQuery = true)
     List<GroupMemberDTO> findGroupMembersNative(@Param("groupId") Long groupId);
 

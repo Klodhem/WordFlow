@@ -22,6 +22,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourceRegion;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRange;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -40,6 +45,8 @@ import static git.klodhem.backend.util.SecurityUtil.getCurrentUser;
 @Transactional
 @Log4j2
 public class VideoServiceImpl implements VideoService {
+    private static final long CHUNK_SIZE = 2 * 1024 * 1024;
+
     private final VideosRepository videosRepository;
 
     private final GroupsRepository groupsRepository;
@@ -270,6 +277,28 @@ public class VideoServiceImpl implements VideoService {
             throw new VideoFileException(String.format("Ошибка при удалении файлов видео %s", video.getTitle()), e);
         }
         videosRepository.delete(video);
+    }
+
+    @Override
+    public ResourceRegion getVideoRegion(long videoId, Long groupId, HttpHeaders headers) {
+        File videoFile = getVideoFile(videoId, groupId);
+        long contentLength = videoFile.length();
+        Resource videoResource = new FileSystemResource(videoFile);
+        HttpRange range = headers.getRange().stream().findFirst().orElse(null);
+
+        if (range != null) {
+            long start = range.getRangeStart(contentLength);
+            long end = range.getRangeEnd(contentLength);
+            if (end >= contentLength) {
+                end = start + CHUNK_SIZE - 1;
+            }
+            long requestedSize = end - start + 1;
+            long regionLength = Math.max(requestedSize, CHUNK_SIZE);
+            regionLength = Math.min(regionLength, contentLength - start);
+            return new ResourceRegion(videoResource, start, regionLength);
+        } else {
+            return new ResourceRegion(videoResource, 0, contentLength);
+        }
     }
 
     public Video getVideoById(long id) {

@@ -16,7 +16,7 @@ import git.klodhem.backend.model.UserAnswerSheet;
 import git.klodhem.backend.model.Video;
 import git.klodhem.backend.repositories.GroupsRepository;
 import git.klodhem.backend.repositories.QuestionsRepository;
-import git.klodhem.backend.repositories.SolutionRepository;
+import git.klodhem.backend.repositories.SolutionsRepository;
 import git.klodhem.backend.services.TestService;
 import git.klodhem.backend.util.TestUtil;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +41,7 @@ import static git.klodhem.backend.util.SecurityUtil.getCurrentUser;
 public class TestServiceImpl implements TestService {
     private final YandexGPTServiceImpl yandexGPTService;
 
-    private final SolutionRepository solutionRepository;
+    private final SolutionsRepository solutionsRepository;
 
     private final GroupsRepository groupsRepository;
 
@@ -153,7 +153,7 @@ public class TestServiceImpl implements TestService {
             if (!videoService.checkAccessFromVideoById(videoId))
                 return null;
 
-            List<Solution> solutions = solutionRepository.findByVideo_VideoId(videoId);
+            List<Solution> solutions = solutionsRepository.findByVideo_VideoId(videoId);
             return convertSolutionsToDTOs(solutions);
         } else {
             if (userId == null) { // показывает результат студенту
@@ -183,8 +183,12 @@ public class TestServiceImpl implements TestService {
         if (!videoService.checkAccessFromVideoById(videoId))
             return null;
 
-        List<Solution> solutions = solutionRepository.findByVideo_VideoId(videoId);
-        return convertSolutionsToDTOs(solutions);
+        List<Solution> solutions = solutionsRepository.findByVideo_VideoIdAndUser_UserId(videoId, studentId);
+        Map<Long, String> questionTextMap = questionsRepository.findByVideo_VideoId(videoId)
+                .stream()
+                .collect(Collectors.toMap(Question::getQuestionId, Question::getText));
+
+        return convertSolutionsToSolutionStudentDTOs(solutions, questionTextMap);
     }
 
     private List<QuestionDTO> QuestionsToQuestionsDTO(List<Question> questions) {
