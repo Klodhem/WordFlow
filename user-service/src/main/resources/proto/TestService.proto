@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package test;
+
+option java_package = "git.klodhem.grpc.test";
+option java_outer_classname = "TestServiceProto";
+
+message GetTestRequest {
+  string videoId = 1;
+  int64 userId = 2;
+}
+
+message AnswerDTO {
+  int64 answerId = 1;
+  string text = 2;
+  bool isCorrect = 3;
+}
+
+message QuestionDTO {
+  int64 questionId = 1;
+  string text = 2;
+  string type = 3;
+  int32 countCorrectAnswers = 4;
+  repeated AnswerDTO answers = 5;
+}
+
+message QuestionListResponse {
+  repeated QuestionDTO questions = 1;
+}
+
+
+service TestService {
+  rpc GetTest(GetTestRequest) returns (QuestionListResponse);
+}

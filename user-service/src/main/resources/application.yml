@@ -1,0 +1,92 @@
+spring:
+  application:
+    name: backend
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/user_service_db
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+        show_sql: true
+        hbm2ddl:
+          auto: none
+        order_updates: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  mvc:
+    hidden method:
+      filter:
+        enabled: true
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092, localhost:9094
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      properties:
+        delivery.timeout.ms: 20000
+        linger.ms: 0
+        request.timeout.ms: 10000
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+  grpc:
+    client:
+      channels:
+        video-service:
+          address: 'static://localhost:9020'
+          enableKeepAlive: true
+          keepAliveWithoutCalls: true
+          negotiationType: plaintext
+
+app:
+  upload:
+    directory: uploads/
+  sub:
+    directory: subtitles/
+
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          client:
+            RestTemplate: DEBUG
+    root: INFO
+    git.klodhem.backend.controllers: DEBUG
+    git.klodhem.backend.services: DEBUG
+  file:
+    name: logs/translator_log.log
+    path: logs
+    pattern:
+      console: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
+      file: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
+
+
+jwt_secret: ${JWT_SECRET}
+
+ffmpeg:
+  ffmpegPath: C:\FFmpeg\bin\ffmpeg.exe
+  ffprobePath: C:\FFmpeg\bin\ffprobe.exe
+
+yandex:
+  speech.api.key: ${YANDEX_SPEECH_API_KEY}
+  folderId: ${FOLDER_ID}
+  url:
+    SynthesisSpeech: "https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize"
+
+minio:
+  bucket: ${BUCKET_MINIO}
+  user: ${MINIO_USER}
+  password: ${MINIO_PASSWORD}
+
+jwt:
+  expiration:
+    minutes: 60

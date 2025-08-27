@@ -1,0 +1,61 @@
+package git.klodhem.backend.model;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+@Entity
+@Table(name = "groups")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class Group {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "groups_seq")
+    @SequenceGenerator(
+            name = "groups_seq",
+            sequenceName = "groups_seq",
+            allocationSize = 50
+    )
+    @Column(name = "group_id")
+    private long groupId;
+
+    @Column(name = "group_name", nullable = false)
+    private String groupName;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id", referencedColumnName = "user_id")
+    @JsonBackReference
+    private User owner;
+
+    @ManyToMany
+    @JoinTable(
+            name = "groups_users",
+            joinColumns = @JoinColumn(name = "group_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> students;
+
+    @ElementCollection
+    @CollectionTable(name = "groups_videos", joinColumns = @JoinColumn(name = "group_id"))
+    @Column(name = "video_id")
+    private List<String> videos;
+}

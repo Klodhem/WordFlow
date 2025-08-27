@@ -23,11 +23,7 @@ const selectVideo = async video => {
     try {
       let response;
       if (!Number.isNaN(groupId)) {
-        response = await apiClient.get(`/videos/${video.videoId}/dictionary`, {
-          params: {
-            groupId: groupId
-          }
-        });
+        response = await apiClient.get(`/videos/group/${groupId}/${video.videoId}/dictionary`);
       } else {
         response = await apiClient.get(`/videos/${video.videoId}/dictionary`);
       }

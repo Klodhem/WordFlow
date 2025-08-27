@@ -1,0 +1,69 @@
+spring:
+  application.name: video-service
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092, localhost:9094
+      group-id: video-processing-events
+      properties.json.trusted.packages: git.klodhem.common.*
+  json.remove.type.headers: false
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/video_service_db
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+        show_sql: true
+        hbm2ddl:
+          auto: none
+        order_updates: true
+  grpc:
+    server:
+      port: 9020
+
+logging:
+  level:
+    root: INFO
+    git.klodhem.backend.controllers: DEBUG
+    git.klodhem.backend.services: DEBUG
+    org.springframework.web.client.RestTemplate: DEBUG
+
+  file:
+    name: logs/translator_log.log
+    path: logs
+    pattern:
+      console: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
+      file: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
+
+app:
+  upload:
+    directory: uploads/
+  sub:
+    directory: subtitles/
+ffmpeg:
+  ffmpegPath: C:\FFmpeg\bin\ffmpeg.exe
+  ffprobePath: C:\FFmpeg\bin\ffprobe.exe
+
+yandex:
+  bucket: ${BUCKET_NAME}
+  KEY_ID: ${YANDEX_SECRET_KEY_ID}
+  SECRET_KEY: ${YANDEX_SECRET_KEY}
+  REGION: "ru-central1"
+  S3_ENDPOINT: "https://storage.yandexcloud.net"
+  speech.api.key: ${YANDEX_SPEECH_API_KEY}
+  folderId: ${FOLDER_ID}
+  modelUri: "gpt://${FOLDER_ID}/yandexgpt/rc"
+  url:
+    TranslateText: "https://translate.api.cloud.yandex.net/translate/v2/translate"
+    RecognitionSpeech: "https://storage.yandexcloud.net/video.translate/"
+    OperationDone: "https://operation.api.cloud.yandex.net/operations/"
+    RecognitionResult: "https://stt.api.cloud.yandex.net/stt/v3/getRecognition?operationId="
+    StartAsyncRecognition: "https://stt.api.cloud.yandex.net:443/stt/v3/recognizeFileAsync"
+    GPT: "https://llm.api.cloud.yandex.net/foundationModels/v1/completionAsync"
+    GetGPT: "https://operation.api.cloud.yandex.net/operations/"
+
+server:
+  port: 8081

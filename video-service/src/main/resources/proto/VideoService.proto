@@ -1,0 +1,112 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+
+package video;
+
+option java_package = "git.klodhem.grpc.video";
+option java_outer_classname = "VideoServiceProto";
+
+message VideoDTO {
+  string videoId = 1;
+  string title = 2;
+  string status = 3;
+}
+
+message VideoListRequest {
+  int64 userId = 1;
+}
+
+message VideoListResponse {
+  repeated VideoDTO videos = 1;
+}
+
+message TranslateProposalDTO {
+  string original = 1;
+  string translated = 2;
+}
+
+message PhraseSearchRequest {
+  string videoId = 1;
+  string phrase = 2;
+}
+
+message PhraseSearchResponse {
+  optional int64 time = 1;
+}
+
+message DictionaryRequest {
+  string videoId = 1;
+  int64 userId = 2;
+}
+
+message DictionaryRequestGroup {
+  string videoId = 1;
+}
+
+message TranslateProposalListResponse {
+  repeated TranslateProposalDTO proposals = 1;
+}
+
+message DeleteVideoRequest {
+  string videoId = 1;
+  int64 userId = 2;
+}
+
+message VttFilePathRequest {
+  string videoId = 1;
+  string type = 2;
+  int64 userId = 3;
+}
+
+message VttFilePathRequestGroup {
+  string videoId = 1;
+  string type = 2;
+}
+
+message VttFilePathResponse {
+  string vttFilePath = 1;
+}
+
+message VideoFilePathRequest {
+  string videoId = 1;
+  int64 userId = 2;
+}
+
+message VideoFilePathRequestGroup {
+  string videoId = 1;
+}
+
+message VideoFilePathResponse {
+  string videoFilePath = 1;
+}
+
+message VideoGroupRequest {
+  repeated string videosId = 1;
+}
+
+message VideoGroupResponse {
+  repeated VideoDTO videos = 1;
+}
+
+message CheckAccessFromVideoByVideoIdAndUserIdRequest {
+  string videoId = 1;
+  int64 userId = 2;
+}
+
+message CheckAccessFromVideoByVideoIdAndUserIdResponse {
+  bool access = 1;
+}
+
+service VideoService {
+  rpc GetVideos(VideoListRequest) returns (VideoListResponse);
+  rpc SearchPhrase(PhraseSearchRequest) returns (PhraseSearchResponse);
+  rpc GetDictionary(DictionaryRequest) returns (TranslateProposalListResponse);
+  rpc GetDictionaryGroup(DictionaryRequestGroup) returns (TranslateProposalListResponse);
+  rpc DeleteVideo(DeleteVideoRequest) returns (google.protobuf.Empty);
+  rpc GetVttFilePath(VttFilePathRequest) returns (VttFilePathResponse);
+  rpc GetVttFilePathGroup(VttFilePathRequestGroup) returns (VttFilePathResponse);
+  rpc GetVideoFilePath(VideoFilePathRequest) returns (VideoFilePathResponse);
+  rpc GetVideoFilePathGroup(VideoFilePathRequestGroup) returns (VideoFilePathResponse);
+  rpc GetVideosGroup(VideoGroupRequest) returns (VideoGroupResponse);
+  rpc CheckAccessFromVideoByVideoIdAndUserId(CheckAccessFromVideoByVideoIdAndUserIdRequest) returns (CheckAccessFromVideoByVideoIdAndUserIdResponse);
+}
