@@ -1,7 +1,7 @@
 <script setup>
 import {reactive, ref} from "vue";
 import {useRouter} from "vue-router";
-import axios from "axios";
+import axiosLogin from "@/axiosLogin.js";
 
 const router = useRouter()
 
@@ -20,7 +20,7 @@ const loginForm = async () => {
   if (errors.username || errors.password) return;
 
   try {
-    const response = await axios.post('http://localhost:8080/auth/login', {
+    const response = await axiosLogin.post('auth/login', {
       username: username.value,
       password: password.value
     })

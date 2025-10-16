@@ -1,11 +1,7 @@
 spring:
   application:
     name: backend
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/user_service_db
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+
   jpa:
     properties:
       hibernate:
@@ -25,26 +21,6 @@ spring:
     hidden method:
       filter:
         enabled: true
-  kafka:
-    producer:
-      bootstrap-servers: localhost:9092, localhost:9094
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      acks: all
-      properties:
-        delivery.timeout.ms: 20000
-        linger.ms: 0
-        request.timeout.ms: 10000
-        enable.idempotence: true
-        max.in.flight.requests.per.connection: 5
-  grpc:
-    client:
-      channels:
-        video-service:
-          address: 'static://localhost:9020'
-          enableKeepAlive: true
-          keepAliveWithoutCalls: true
-          negotiationType: plaintext
 
 app:
   upload:
@@ -72,9 +48,6 @@ logging:
 
 jwt_secret: ${JWT_SECRET}
 
-ffmpeg:
-  ffmpegPath: C:\FFmpeg\bin\ffmpeg.exe
-  ffprobePath: C:\FFmpeg\bin\ffprobe.exe
 
 yandex:
   speech.api.key: ${YANDEX_SPEECH_API_KEY}
@@ -90,3 +63,104 @@ minio:
 jwt:
   expiration:
     minutes: 60
+
+# ==========================================
+# ======= Запуск через IntelliJ IDEA =======
+# ==========================================
+---
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/user_service_db
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092,localhost:9094
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      properties:
+        delivery.timeout.ms: 20000
+        linger.ms: 0
+        request.timeout.ms: 10000
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+
+grpc:
+  server:
+    port: 50051
+    host: localhost
+
+ffmpeg:
+  ffmpegPath: C:\FFmpeg\bin\ffmpeg.exe
+  ffprobePath: C:\FFmpeg\bin\ffprobe.exe
+
+# ==========================================
+# ================ Docker ==================
+# ==========================================
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://service-db/user_service_db
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+
+  kafka:
+    producer:
+      bootstrap-servers: kafka-1:9090,kafka-2:9090,kafka-3:9090
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      properties:
+        delivery.timeout.ms: 20000
+        linger.ms: 0
+        request.timeout.ms: 10000
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+
+grpc:
+  server:
+    port: 50051
+    host: video-service
+
+ffmpeg:
+  ffmpegPath: ${FFMPEG_PATH:/usr/bin/ffmpeg}
+  ffprobePath: ${FFPROBE_PATH:/usr/bin/ffprobe}
+
+#  datasource:
+#    driver-class-name: org.postgresql.Driver
+#    url: jdbc:postgresql://localhost:5432/user_service_db
+#    username: ${SPRING_DATASOURCE_USERNAME}
+#    password: ${SPRING_DATASOURCE_PASSWORD}
+#  kafka:
+#    producer:
+#      bootstrap-servers: kafka:9092, kafka:9094
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#      acks: all
+#      properties:
+#        delivery.timeout.ms: 20000
+#        linger.ms: 0
+#        request.timeout.ms: 10000
+#        enable.idempotence: true
+#        max.in.flight.requests.per.connection: 5
+#  grpc:
+#    client:
+#      channels:
+#        video-service:
+#          address: 'static://localhost:9020'
+#          enableKeepAlive: true
+#          keepAliveWithoutCalls: true
+#          negotiationType: plaintext

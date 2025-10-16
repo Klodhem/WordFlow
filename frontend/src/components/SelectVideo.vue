@@ -7,7 +7,7 @@ import {useRoute} from "vue-router";
 let props = defineProps(['videos']);
 const emit = defineEmits(['update:videos'])
 const groupId = Number(useRoute().params.groupId)
-
+const API_URL = import.meta.env.VITE_API_URL;
 const route = useRoute()
 const testPairs = ref([]);
 const videoUrl = ref(null);
@@ -17,6 +17,10 @@ const selectedVideo = ref(null);
 const test = ref([])
 const userAnswers = reactive({});
 const store = useStore();
+
+const getApiUrl = (path) => {
+  return API_URL === '/' || API_URL === '' ? path : `${API_URL}${path}`
+}
 
 const selectVideo = async video => {
   if (video.status === 'OK') {
@@ -35,15 +39,15 @@ const selectVideo = async video => {
     let videoResponse, originalSubtitleResponse, translatedSubtitleResponse;
     if (!Number.isNaN(groupId)) {
       [videoResponse, originalSubtitleResponse, translatedSubtitleResponse] = await Promise.all([
-        fetchWithAuth(`http://localhost:8080/videos/group/${groupId}/${video.videoId}/watch`),
-        fetchWithAuth(`http://localhost:8080/videos/group/${groupId}/${video.videoId}/originalSubtitle`),
-        fetchWithAuth(`http://localhost:8080/videos/group/${groupId}/${video.videoId}/translateSubtitle`)
+        fetchWithAuth(getApiUrl(`/videos/group/${groupId}/${video.videoId}/watch`)),
+        fetchWithAuth(getApiUrl(`/videos/group/${groupId}/${video.videoId}/originalSubtitle`)),
+        fetchWithAuth(getApiUrl(`/videos/group/${groupId}/${video.videoId}/translateSubtitle`))
       ]);
     } else {
       [videoResponse, originalSubtitleResponse, translatedSubtitleResponse] = await Promise.all([
-        fetchWithAuth(`http://localhost:8080/videos/${video.videoId}/watch`),
-        fetchWithAuth(`http://localhost:8080/videos/${video.videoId}/originalSubtitle`),
-        fetchWithAuth(`http://localhost:8080/videos/${video.videoId}/translateSubtitle`)
+        fetchWithAuth(getApiUrl(`/videos/${video.videoId}/watch`)),
+        fetchWithAuth(getApiUrl(`/videos/${video.videoId}/originalSubtitle`)),
+        fetchWithAuth(getApiUrl(`/videos/${video.videoId}/translateSubtitle`))
       ]);
     }
     videoUrl.value = videoResponse;

@@ -1,7 +1,7 @@
 <script setup>
 import {reactive, ref} from "vue";
 import {useRouter} from "vue-router";
-import axios from "axios";
+import axiosLogin from "@/axiosLogin.js";
 
 const router = useRouter()
 
@@ -34,13 +34,13 @@ const registrationForm = async () => {
     let response;
 
     if (typeUser.value === 1) {
-      response = await axios.post('http://localhost:8080/auth/registration', {
+      response = await axiosLogin.post('/auth/registration', {
         username: username.value,
         email: email.value,
         password: password.value
       });
     } else if (typeUser.value === 2) {
-      response = await axios.post('http://localhost:8080/auth/registrationTeacher', {
+      response = await axiosLogin.post('auth/registrationTeacher', {
         username: username.value,
         email: email.value,
         password: password.value
