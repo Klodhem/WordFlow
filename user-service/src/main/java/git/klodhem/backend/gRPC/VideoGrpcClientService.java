@@ -1,5 +1,6 @@
 package git.klodhem.backend.gRPC;
 
+import git.klodhem.backend.services.CacheService;
 import git.klodhem.common.dto.TranslateProposalDTO;
 import git.klodhem.common.dto.model.VideoDTO;
 import git.klodhem.common.exception.VideoFileException;
@@ -28,6 +29,8 @@ public class VideoGrpcClientService {
 
     private static final long CHUNK_SIZE = 2 * 1024 * 1024;
 
+    private final CacheService cacheService;
+
     public List<VideoDTO> getVideos() {
         VideoServiceProto.VideoListRequest request = VideoServiceProto.VideoListRequest.newBuilder()
                 .setUserId(getCurrentUser().getUserId())
@@ -55,7 +58,7 @@ public class VideoGrpcClientService {
                 .build();
 
         VideoServiceProto.PhraseSearchResponse response = videoStub.searchPhrase(request);
-        if (response.hasTime()){
+        if (response.hasTime()) {
             return response.getTime();
         } else return null;
     }
@@ -108,39 +111,50 @@ public class VideoGrpcClientService {
     }
 
     public ResourceRegion getVideoRegion(String videoId, boolean fromGroup, HttpHeaders headers) {
-        VideoServiceProto.VideoFilePathResponse response;
-        if (!fromGroup) {
-            VideoServiceProto.VideoFilePathRequest request = VideoServiceProto.VideoFilePathRequest.newBuilder()
-                    .setVideoId(videoId)
-                    .setUserId(getCurrentUser().getUserId())
-                    .build();
-            response = videoStub.getVideoFilePath(request);
+        String videoFilePath;
+        String s = cacheService.get(videoId);
+        if (s != null) {
+            videoFilePath = s;
         } else {
-            VideoServiceProto.VideoFilePathRequestGroup request = VideoServiceProto.VideoFilePathRequestGroup.newBuilder()
-                    .setVideoId(videoId)
-                    .build();
-            response = videoStub.getVideoFilePathGroup(request);
+            VideoServiceProto.VideoFilePathResponse response;
+            if (!fromGroup) {
+                VideoServiceProto.VideoFilePathRequest request = VideoServiceProto.VideoFilePathRequest.newBuilder()
+                        .setVideoId(videoId)
+                        .setUserId(getCurrentUser().getUserId())
+                        .build();
+                response = videoStub.getVideoFilePath(request);
+            } else {
+                VideoServiceProto.VideoFilePathRequestGroup request = VideoServiceProto.VideoFilePathRequestGroup.newBuilder()
+                        .setVideoId(videoId)
+                        .build();
+                response = videoStub.getVideoFilePathGroup(request);
+            }
+            videoFilePath = response.getVideoFilePath();
+            cacheService.set(videoId, videoFilePath);
         }
+        return buildRegion(videoFilePath, headers);
+    }
 
-        String videoFilePath = response.getVideoFilePath();
+    private ResourceRegion buildRegion(String videoFilePath, HttpHeaders headers) {
         File videoFile = new File(videoFilePath);
         long contentLength = videoFile.length();
         Resource videoResource = new FileSystemResource(videoFile);
         HttpRange range = headers.getRange().stream().findFirst().orElse(null);
 
-        if (range != null) {
-            long start = range.getRangeStart(contentLength);
-            long end = range.getRangeEnd(contentLength);
-            if (end >= contentLength) {
-                end = start + CHUNK_SIZE - 1;
-            }
-            long requestedSize = end - start + 1;
-            long regionLength = Math.max(requestedSize, CHUNK_SIZE);
-            regionLength = Math.min(regionLength, contentLength - start);
-            return new ResourceRegion(videoResource, start, regionLength);
-        } else {
+        if (range == null) {
             return new ResourceRegion(videoResource, 0, contentLength);
         }
+
+        long start = range.getRangeStart(contentLength);
+        long end = range.getRangeEnd(contentLength);
+        if (end >= contentLength) {
+            end = start + CHUNK_SIZE - 1;
+        }
+        long requestedSize = end - start + 1;
+        long regionLength = Math.max(requestedSize, CHUNK_SIZE);
+        regionLength = Math.min(regionLength, contentLength - start);
+        return new ResourceRegion(videoResource, start, regionLength);
+
     }
 
     private VideoDTO fromProto(VideoServiceProto.VideoDTO proto) {

@@ -153,8 +153,17 @@ services:
     volumes:
       - ./volumes/server-3:/bitnami/kafka
 
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
 volumes:
   db-data:
   pgadmin-data:
   ffmpeg-bin:
   maven-repo:
+  redis-data:

@@ -93,6 +93,11 @@ spring:
         enable.idempotence: true
         max.in.flight.requests.per.connection: 5
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
 grpc:
   server:
     port: 50051
@@ -130,6 +135,11 @@ spring:
         enable.idempotence: true
         max.in.flight.requests.per.connection: 5
 
+  data:
+    redis:
+      host: redis
+      port: 6379
+
 grpc:
   server:
     port: 50051
@@ -138,29 +148,3 @@ grpc:
 ffmpeg:
   ffmpegPath: ${FFMPEG_PATH:/usr/bin/ffmpeg}
   ffprobePath: ${FFPROBE_PATH:/usr/bin/ffprobe}
-
-#  datasource:
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://localhost:5432/user_service_db
-#    username: ${SPRING_DATASOURCE_USERNAME}
-#    password: ${SPRING_DATASOURCE_PASSWORD}
-#  kafka:
-#    producer:
-#      bootstrap-servers: kafka:9092, kafka:9094
-#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-#      acks: all
-#      properties:
-#        delivery.timeout.ms: 20000
-#        linger.ms: 0
-#        request.timeout.ms: 10000
-#        enable.idempotence: true
-#        max.in.flight.requests.per.connection: 5
-#  grpc:
-#    client:
-#      channels:
-#        video-service:
-#          address: 'static://localhost:9020'
-#          enableKeepAlive: true
-#          keepAliveWithoutCalls: true
-#          negotiationType: plaintext
